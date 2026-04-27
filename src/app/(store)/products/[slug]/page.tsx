@@ -4,13 +4,17 @@ import { notFound } from "next/navigation"
 import AddToCartButton from "@/components/store/AddToCartButton"
 import { Badge } from "@/components/ui/badge"
 import { Package } from "lucide-react"
+import { serializeProduct } from "@/lib/serialize"
 
 async function getProduct(slug: string) {
-  return prisma.product.findUnique({
+  const product = await prisma.product.findUnique({
     where: { slug },
     include: { category: true },
   })
+  if (!product) return null
+  return serializeProduct(product)
 }
+
 export async function generateMetadata({
     params,
   }: {
@@ -187,6 +191,28 @@ export default async function ProductDetailPage({
           <AddToCartButton product={product as any} />
         </div>
       </div>
+      {/* JSON-LD Structured Data */}
+<script
+  type="application/ld+json"
+  dangerouslySetInnerHTML={{
+    __html: JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "Product",
+      name: product.name,
+      description: product.description,
+      image: product.images,
+      offers: {
+        "@type": "Offer",
+        price: Number(product.price),
+        priceCurrency: "PKR",
+        availability:
+          product.stock > 0
+            ? "https://schema.org/InStock"
+            : "https://schema.org/OutOfStock",
+      },
+    }),
+  }}
+/>
     </div>
   )
 }

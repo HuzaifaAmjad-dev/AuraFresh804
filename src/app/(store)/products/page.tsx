@@ -1,9 +1,10 @@
 import { prisma } from "@/lib/prisma"
 import ProductCard from "@/components/store/ProductCard"
 import { Package } from "lucide-react"
+import { serializeProducts } from "@/lib/serialize"
 
 async function getProducts(category?: string) {
-  return prisma.product.findMany({
+  const products = await prisma.product.findMany({
     where: {
       isActive: true,
       ...(category ? { category: { slug: category } } : {}),
@@ -11,7 +12,9 @@ async function getProducts(category?: string) {
     include: { category: true },
     orderBy: { createdAt: "desc" },
   })
+  return serializeProducts(products)
 }
+
 
 async function getCategories() {
   return prisma.category.findMany({
