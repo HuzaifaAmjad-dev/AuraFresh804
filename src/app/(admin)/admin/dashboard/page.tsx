@@ -3,6 +3,8 @@ import { ShoppingBag, Package, Users, TrendingUp } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 export const dynamic = "force-dynamic"
 async function getStats() {
+  console.log("DATABASE_URL =", process.env.DATABASE_URL)
+
   const [totalOrders, totalProducts, totalCustomers, pendingOrders] =
     await Promise.all([
       prisma.order.count(),
