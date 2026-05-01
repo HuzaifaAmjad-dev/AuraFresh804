@@ -153,7 +153,7 @@
 //     </div>
 //   )
 // }
-
+export const dynamic = "force-dynamic"
 import { prisma } from "@/lib/prisma"
 import { serializeProducts } from "@/lib/serialize"
 import HomeClient from "./Homeclient"

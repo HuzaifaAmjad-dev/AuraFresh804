@@ -3,7 +3,7 @@ import Credentials from "next-auth/providers/credentials"
 import { prisma } from "@/lib/prisma"
 import bcrypt from "bcryptjs"
 import { z } from "zod"
-
+export const dynamic = "force-dynamic"
 export const runtime = "nodejs"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({

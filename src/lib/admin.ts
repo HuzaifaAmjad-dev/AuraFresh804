@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma"
 import bcrypt from "bcryptjs"
-
+export const dynamic = "force-dynamic"
 async function createAdmin() {
   const hashedPassword = await bcrypt.hash("admin123", 12)
 
