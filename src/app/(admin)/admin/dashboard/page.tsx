@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma"
 import { ShoppingBag, Package, Users, TrendingUp } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-
+export const dynamic = "force-dynamic"
 async function getStats() {
   const [totalOrders, totalProducts, totalCustomers, pendingOrders] =
     await Promise.all([
