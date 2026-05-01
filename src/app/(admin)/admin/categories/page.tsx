@@ -21,7 +21,8 @@ interface Category {
   slug: string
   description?: string
   image?: string
-  _count: { products: number }
+  isDeleted?: boolean
+  _count?: { products?: number }
 }
 
 export default function CategoriesPage() {
@@ -119,7 +120,9 @@ export default function CategoriesPage() {
             <Card key={cat.id}>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-base">{cat.name}</CardTitle>
-                <Badge variant="secondary">{cat._count.products} products</Badge>
+                <Badge variant="secondary">
+  {cat._count?.products ?? 0} products
+</Badge>
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-gray-500 mb-4">

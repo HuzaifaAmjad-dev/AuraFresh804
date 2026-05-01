@@ -30,7 +30,8 @@ export default function ProductsPage() {
   async function fetchProducts() {
     const res = await fetch("/api/products")
     const data = await res.json()
-    setProducts(data)
+  
+    setProducts(data.filter((p: any) => !p.isDeleted))
     setLoading(false)
   }
 

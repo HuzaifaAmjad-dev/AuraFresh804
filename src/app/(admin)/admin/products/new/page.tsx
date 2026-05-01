@@ -55,33 +55,34 @@ export default function NewProductPage() {
 
   async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const files = e.target.files
-    if (!files) return
+    if (!files || files.length === 0) return
+  
     setUploading(true)
-
+  
     try {
       for (const file of Array.from(files)) {
         const formData = new FormData()
         formData.append("file", file)
-        formData.append(
-          "upload_preset",
-          process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!
-        )
-
-        const res = await fetch(
-          `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
-          { method: "POST", body: formData }
-        )
-
+  
+        const res = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        })
+  
         const data = await res.json()
-        if (data.secure_url) {
-          setImages((prev) => [...prev, data.secure_url])
+  
+        if (data.url) {
+          setImages((prev) => [...prev, data.url])
         }
       }
+  
       toast.success("Images uploaded!")
-    } catch {
+    } catch (err) {
+      console.error(err)
       toast.error("Failed to upload images")
     } finally {
       setUploading(false)
+      e.target.value = ""
     }
   }
 
@@ -102,6 +103,9 @@ export default function NewProductPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...form,
+          price: Number(form.price),
+          comparePrice: form.comparePrice ? Number(form.comparePrice) : null,
+          stock: Number(form.stock),
           images,
           topNotes: form.topNotes.split(",").map((s) => s.trim()).filter(Boolean),
           middleNotes: form.middleNotes.split(",").map((s) => s.trim()).filter(Boolean),

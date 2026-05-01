@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { toast } from "sonner"
 import { Loader2, Package } from "lucide-react"
 import Image from "next/image"
+import { getImageUrl } from "@/lib/image"
 
 interface CartItem {
   id: string
@@ -22,9 +23,12 @@ interface CartItem {
 
 export default function CheckoutPage() {
   const router = useRouter()
+
   const [cart, setCart] = useState<CartItem[]>([])
   const [mounted, setMounted] = useState(false)
   const [placing, setPlacing] = useState(false)
+  const [uploading, setUploading] = useState(false)
+
   const [form, setForm] = useState({
     customerName: "",
     customerEmail: "",
@@ -34,6 +38,9 @@ export default function CheckoutPage() {
     province: "",
     postalCode: "",
     notes: "",
+
+    payerName: "",
+    paymentScreenshot: "",
   })
 
   useEffect(() => {
@@ -46,11 +53,29 @@ export default function CheckoutPage() {
     (sum, item) => sum + item.price * item.quantity,
     0
   )
+
   const shipping = subtotal > 3000 ? 0 : 200
   const total = subtotal + shipping
 
+  // ✅ Upload image to your API
+  async function uploadImage(file: File) {
+    const formData = new FormData()
+    formData.append("file", file)
+
+    const res = await fetch("/api/upload", {
+      method: "POST",
+      body: formData,
+    })
+
+    if (!res.ok) throw new Error("Upload failed")
+
+    const data = await res.json()
+    return data.url as string
+  }
+
   async function handlePlaceOrder() {
     if (cart.length === 0) return toast.error("Your cart is empty")
+
     if (!form.customerName) return toast.error("Name is required")
     if (!form.customerEmail) return toast.error("Email is required")
     if (!form.customerPhone) return toast.error("Phone is required")
@@ -70,6 +95,7 @@ export default function CheckoutPage() {
           shippingCost: shipping,
           total,
           paymentMethod: "COD",
+
           items: cart.map((item) => ({
             productId: item.id,
             quantity: item.quantity,
@@ -82,7 +108,6 @@ export default function CheckoutPage() {
 
       const order = await res.json()
 
-      // Clear cart
       localStorage.removeItem("cart")
       window.dispatchEvent(new Event("cartUpdated"))
 
@@ -104,206 +129,256 @@ export default function CheckoutPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">Checkout</h1>
+      <h1 className="text-3xl font-bold text-gray-900 mb-8">
+        Checkout
+      </h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Form */}
+
+        {/* LEFT SIDE */}
         <div className="lg:col-span-2 space-y-6">
+
+          {/* PERSONAL INFO */}
           <Card>
             <CardHeader>
               <CardTitle>Personal Information</CardTitle>
             </CardHeader>
+
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Full Name</Label>
-                  <Input
-                    placeholder="Muhammad Ali"
-                    value={form.customerName}
-                    onChange={(e) =>
-                      setForm({ ...form, customerName: e.target.value })
-                    }
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Phone Number</Label>
-                  <Input
-                    placeholder="03001234567"
-                    value={form.customerPhone}
-                    onChange={(e) =>
-                      setForm({ ...form, customerPhone: e.target.value })
-                    }
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label>Email Address</Label>
-                <Input
-                  type="email"
-                  placeholder="email@example.com"
-                  value={form.customerEmail}
-                  onChange={(e) =>
-                    setForm({ ...form, customerEmail: e.target.value })
-                  }
-                />
-              </div>
+              <Input
+                placeholder="Full Name"
+                value={form.customerName}
+                onChange={(e) =>
+                  setForm({ ...form, customerName: e.target.value })
+                }
+              />
+
+              <Input
+                placeholder="Email"
+                value={form.customerEmail}
+                onChange={(e) =>
+                  setForm({ ...form, customerEmail: e.target.value })
+                }
+              />
+
+              <Input
+                placeholder="Phone"
+                value={form.customerPhone}
+                onChange={(e) =>
+                  setForm({ ...form, customerPhone: e.target.value })
+                }
+              />
             </CardContent>
           </Card>
 
+          {/* ADDRESS */}
           <Card>
             <CardHeader>
               <CardTitle>Shipping Address</CardTitle>
             </CardHeader>
+
             <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label>Street Address</Label>
-                <Input
-                  placeholder="House #, Street, Area"
-                  value={form.address}
-                  onChange={(e) =>
-                    setForm({ ...form, address: e.target.value })
-                  }
-                />
-              </div>
+              <Input
+                placeholder="Address"
+                value={form.address}
+                onChange={(e) =>
+                  setForm({ ...form, address: e.target.value })
+                }
+              />
+
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>City</Label>
-                  <Input
-                    placeholder="Rawalpindi"
-                    value={form.city}
-                    onChange={(e) =>
-                      setForm({ ...form, city: e.target.value })
-                    }
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Province</Label>
-                  <Input
-                    placeholder="Punjab"
-                    value={form.province}
-                    onChange={(e) =>
-                      setForm({ ...form, province: e.target.value })
-                    }
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label>Postal Code (Optional)</Label>
                 <Input
-                  placeholder="46000"
-                  value={form.postalCode}
+                  placeholder="City"
+                  value={form.city}
                   onChange={(e) =>
-                    setForm({ ...form, postalCode: e.target.value })
+                    setForm({ ...form, city: e.target.value })
+                  }
+                />
+
+                <Input
+                  placeholder="Province"
+                  value={form.province}
+                  onChange={(e) =>
+                    setForm({ ...form, province: e.target.value })
                   }
                 />
               </div>
-              <div className="space-y-2">
-                <Label>Order Notes (Optional)</Label>
-                <Textarea
-                  placeholder="Any special instructions..."
-                  value={form.notes}
-                  onChange={(e) =>
-                    setForm({ ...form, notes: e.target.value })
-                  }
-                />
-              </div>
+
+              <Input
+                placeholder="Postal Code"
+                value={form.postalCode}
+                onChange={(e) =>
+                  setForm({ ...form, postalCode: e.target.value })
+                }
+              />
+
+              <Textarea
+                placeholder="Notes"
+                value={form.notes}
+                onChange={(e) =>
+                  setForm({ ...form, notes: e.target.value })
+                }
+              />
             </CardContent>
           </Card>
 
+          {/* PAYMENT PROOF */}
+          <div className="bg-gradient-to-r from-green-600 to-rose-600 text-white rounded-xl p-6 space-y-4 shadow-lg">
+
+  <p className="text-lg md:text-xl font-extrabold tracking-wide">
+    ⚠️ IMPORTANT PAYMENT INSTRUCTIONS
+  </p>
+
+  <p className="text-sm md:text-base font-medium">
+    Please transfer your payment to the bank account below:
+  </p>
+
+  <div className="bg-white/10 border border-white/20 rounded-lg p-4 text-sm space-y-1 font-medium">
+    <p><span className="font-bold">Bank:</span> United Bank Limited (UBL)</p>
+    <p><span className="font-bold">Account Name:</span> Aizaz Ul Hassan</p>
+    <p><span className="font-bold">Account Number:</span> 0577294618176</p>
+    <p><span className="font-bold">IBAN:</span> PK45UNIL0109000294618176</p>
+  </div>
+
+  <p className="text-yellow-200 font-bold text-sm md:text-base">
+    🚫 Your order will NOT be processed until payment is confirmed.
+  </p>
+
+  <p className="text-white/90 text-sm md:text-base">
+    After payment, upload your screenshot below. Our team will contact you shortly to confirm your order.
+  </p>
+</div>
           <Card>
+            
             <CardHeader>
-              <CardTitle>Payment Method</CardTitle>
+              <CardTitle>Payment Proof</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="flex items-center gap-3 p-4 border-2 border-purple-600 rounded-lg bg-purple-50">
-                <div className="h-4 w-4 rounded-full bg-purple-600" />
-                <div>
-                  <p className="font-medium text-gray-900">
-                    Cash on Delivery (COD)
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    Pay when you receive your order
-                  </p>
-                </div>
-              </div>
+
+            <CardContent className="space-y-4">
+
+              <Input
+                placeholder="Payer Name"
+                value={form.payerName}
+                onChange={(e) =>
+                  setForm({ ...form, payerName: e.target.value })
+                }
+              />
+
+              <Input
+                type="file"
+                accept="image/*"
+                disabled={uploading}
+                onChange={async (e) => {
+                  const file = e.target.files?.[0]
+                  if (!file) return
+
+                  try {
+                    setUploading(true)
+                    const url = await uploadImage(file)
+
+                    setForm((prev) => ({
+                      ...prev,
+                      paymentScreenshot: url,
+                    }))
+
+                    toast.success("Screenshot uploaded")
+                  } catch {
+                    toast.error("Upload failed")
+                  } finally {
+                    setUploading(false)
+                  }
+                }}
+              />
+
+              {uploading && (
+                <p className="text-xs text-gray-500">
+                  Uploading...
+                </p>
+              )}
+
+              {form.paymentScreenshot && (
+                <Image
+                  src={form.paymentScreenshot}
+                  alt="Payment"
+                  width={160}
+                  height={160}
+                  className="rounded-lg border object-cover"
+                />
+              )}
             </CardContent>
           </Card>
+
         </div>
 
-        {/* Order Summary */}
-        <div className="space-y-4">
+        {/* RIGHT SIDE */}
+        <div>
           <Card>
             <CardHeader>
               <CardTitle>Order Summary</CardTitle>
             </CardHeader>
+
             <CardContent className="space-y-4">
+
               {cart.map((item) => (
-                <div key={item.id} className="flex items-center gap-3">
-                  <div className="relative h-12 w-12 rounded-lg overflow-hidden bg-gray-50 flex-shrink-0">
+                <div key={item.id} className="flex gap-3">
+                  <div className="h-12 w-12 relative">
                     {item.image ? (
                       <Image
-                        src={item.image}
+                      src={getImageUrl(item.image)}
                         alt={item.name}
                         fill
-                        className="object-cover"
+                        className="object-cover rounded"
                       />
                     ) : (
-                      <div className="flex items-center justify-center h-full">
-                        <Package className="h-6 w-6 text-gray-200" />
-                      </div>
+                      <Package />
                     )}
                   </div>
+
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900 line-clamp-1">
-                      {item.name}
-                    </p>
-                    <p className="text-xs text-gray-500">x{item.quantity}</p>
+                    <p className="text-sm">{item.name}</p>
+                    <p className="text-xs">x{item.quantity}</p>
                   </div>
-                  <p className="text-sm font-medium">
-                    Rs. {(item.price * item.quantity).toLocaleString()}
+
+                  <p className="text-sm">
+                    Rs {(item.price * item.quantity).toLocaleString()}
                   </p>
                 </div>
               ))}
 
-              <div className="border-t pt-4 space-y-2">
-                <div className="flex justify-between text-sm text-gray-600">
+              <div className="border-t pt-3 space-y-2">
+                <div className="flex justify-between">
                   <span>Subtotal</span>
-                  <span>Rs. {subtotal.toLocaleString()}</span>
+                  <span>Rs {subtotal}</span>
                 </div>
-                <div className="flex justify-between text-sm text-gray-600">
+
+                <div className="flex justify-between">
                   <span>Shipping</span>
                   <span>
-                    {shipping === 0 ? (
-                      <span className="text-green-600">Free</span>
-                    ) : (
-                      `Rs. ${shipping}`
-                    )}
+                    {shipping === 0 ? "Free" : `Rs ${shipping}`}
                   </span>
                 </div>
-                <div className="flex justify-between font-bold text-gray-900 pt-2 border-t">
+
+                <div className="flex justify-between font-bold">
                   <span>Total</span>
-                  <span>Rs. {total.toLocaleString()}</span>
+                  <span>Rs {total}</span>
                 </div>
               </div>
 
               <Button
-                className="w-full bg-purple-600 hover:bg-purple-700"
-                size="lg"
+                className="w-full"
                 onClick={handlePlaceOrder}
                 disabled={placing}
               >
                 {placing ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Placing Order...
-                  </>
-                ) : (
-                  "Place Order"
-                )}
+                  <Loader2 className="animate-spin mr-2" />
+                ) : null}
+                Place Order
               </Button>
+
             </CardContent>
           </Card>
         </div>
+
       </div>
     </div>
   )

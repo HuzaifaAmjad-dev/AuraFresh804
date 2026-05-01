@@ -2,6 +2,10 @@ import type { Metadata } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
 import "./globals.css"
 import { Toaster } from "sonner"
+import WhatsAppFloat from "@/components/WhatsAppFloat"
+
+import Navbar from "../components/store/Navbar"
+import Footer from "@/components/store/Footer"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,7 +28,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_PK",
-    url: "https://aurafresh.pk",
+    url: "https://aurafresh804.com",
     siteName: "AuraFresh",
   },
 }
@@ -37,7 +41,20 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        {children}
+
+        {/* GLOBAL LAYOUT WRAPPER */}
+        <div className="flex flex-col min-h-screen">
+
+          <Navbar />
+
+          <main className="flex-1">
+            {children}
+          </main>
+
+          <Footer />
+          <WhatsAppFloat />
+        </div>
+
         <Toaster richColors position="top-right" />
       </body>
     </html>

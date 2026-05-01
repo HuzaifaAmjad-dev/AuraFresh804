@@ -1,5 +1,5 @@
 "use client"
-
+import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { ShoppingCart, Menu, X } from "lucide-react"
@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils"
 const navLinks = [
   { href: "/", label: "Home" },
   { href: "/products", label: "Shop" },
+  {href:"/about",label: "About Us"}
 ]
 
 export default function Navbar() {
@@ -55,20 +56,16 @@ export default function Navbar() {
 
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 group">
-            <div className="relative">
-              <div className="h-11 w-11 rounded-full bg-gradient-to-br from-amber-400 to-yellow-600 flex items-center justify-center shadow-lg shadow-amber-500/30">
-                <span className="text-gray-950 font-bold text-lg">A</span>
-              </div>
-              <div className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-amber-300 animate-pulse" />
-            </div>
-            <div>
-              <span className="text-2xl font-bold text-white tracking-wide group-hover:text-amber-400 transition-colors">
-                AuraFresh
-              </span>
-              <p className="text-xs text-gray-500 tracking-widest uppercase">
-                Premium Fragrances
-              </p>
-            </div>
+          <div className="relative h-25 w-25"> {/* 🔥 bigger & proportional */}
+    <Image
+      src="/images/logo.png"
+      alt="AuraFresh Logo"
+      fill
+      className="object-contain rounded-full"
+      // sizes="px"
+      priority
+    />
+  </div>
           </Link>
 
           {/* Desktop Nav */}

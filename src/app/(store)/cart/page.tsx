@@ -7,13 +7,14 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Minus, Plus, Trash2, ShoppingCart, Package } from "lucide-react"
 import { toast } from "sonner"
+import { getImageUrl } from "@/lib/image"
 
 interface CartItem {
   id: string
   name: string
   slug: string
   price: number
-  image?: string
+  image?: string   // ✅ single string
   quantity: number
 }
 
@@ -94,11 +95,11 @@ export default function CartPage() {
                 <div className="relative h-20 w-20 rounded-lg overflow-hidden bg-gray-50 flex-shrink-0">
                   {item.image ? (
                     <Image
-                      src={item.image}
-                      alt={item.name}
-                      fill
-                      className="object-cover"
-                    />
+                    src={getImageUrl(item.image)}
+                    alt={item.name}
+                    fill
+                    className="object-cover"
+                  />
                   ) : (
                     <div className="flex items-center justify-center h-full">
                       <Package className="h-8 w-8 text-gray-200" />

@@ -10,84 +10,75 @@ export default function Footer() {
           {/* Brand */}
           <div className="lg:col-span-1">
             <Link href="/" className="flex items-center gap-3 mb-4">
-              <div className="h-10 w-10 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
-                <span className="text-white font-bold text-lg">A</span>
-              </div>
+              
               <div>
                 <span className="text-xl font-bold text-white">AuraFresh</span>
-                <p className="text-xs text-gray-500 tracking-widest uppercase">Premium Fragrances</p>
+                <p className="text-xs text-gray-500 tracking-widest uppercase">
+                  Premium Fragrances
+                </p>
               </div>
             </Link>
+
             <p className="text-sm text-gray-500 leading-relaxed mb-6">
-              Discover your signature scent. We bring you the finest collection
-              of premium perfumes crafted for those who appreciate true luxury.
+              Discover your signature scent. We bring you premium perfumes crafted
+              for true fragrance lovers.
             </p>
+
+            {/* Socials */}
             <div className="flex gap-3">
-              <a href="#" className="h-9 w-9 rounded-lg bg-gray-800 flex items-center justify-center text-gray-400 hover:bg-amber-500 hover:text-white transition-all duration-200">
-                <span className="text-xs font-bold">FB</span>
+              <a
+                href="https://www.facebook.com/Aurafresh804"
+                target="_blank"
+                className="h-9 w-9 rounded-lg bg-gray-800 flex items-center justify-center text-gray-400 hover:bg-amber-500 hover:text-white transition"
+              >
+                FB
               </a>
-              <a href="#" className="h-9 w-9 rounded-lg bg-gray-800 flex items-center justify-center text-gray-400 hover:bg-amber-500 hover:text-white transition-all duration-200">
-                <span className="text-xs font-bold">IG</span>
+
+              <a
+                href="https://www.instagram.com/aurafresh804/"
+                target="_blank"
+                className="h-9 w-9 rounded-lg bg-gray-800 flex items-center justify-center text-gray-400 hover:bg-amber-500 hover:text-white transition"
+              >
+                IG
               </a>
-              <a href="#" className="h-9 w-9 rounded-lg bg-gray-800 flex items-center justify-center text-gray-400 hover:bg-amber-500 hover:text-white transition-all duration-200">
-                <span className="text-xs font-bold">TW</span>
+
+              <a
+                href="https://www.tiktok.com/@aurafresh804"
+                target="_blank"
+                className="h-9 w-9 rounded-lg bg-gray-800 flex items-center justify-center text-gray-400 hover:bg-amber-500 hover:text-white transition"
+              >
+                TT
               </a>
             </div>
           </div>
 
           {/* Quick Links */}
           <div>
-            <h3 className="text-white font-semibold mb-5 text-sm tracking-wider uppercase">
+            <h3 className="text-white font-semibold mb-5 text-sm uppercase tracking-wider">
               Quick Links
             </h3>
             <ul className="space-y-3">
-              <li>
-                <Link href="/" className="text-sm text-gray-500 hover:text-amber-400 transition-colors">
-                  Home
-                </Link>
-              </li>
-              <li>
-                <Link href="/products" className="text-sm text-gray-500 hover:text-amber-400 transition-colors">
-                  Shop All
-                </Link>
-              </li>
-              <li>
-                <Link href="/cart" className="text-sm text-gray-500 hover:text-amber-400 transition-colors">
-                  Cart
-                </Link>
-              </li>
-              <li>
-                <Link href="/checkout" className="text-sm text-gray-500 hover:text-amber-400 transition-colors">
-                  Checkout
-                </Link>
-              </li>
+              <li><Link href="/" className="hover:text-amber-400 text-sm">Home</Link></li>
+              <li><Link href="/products" className="hover:text-amber-400 text-sm">Shop All</Link></li>
+              <li><Link href="/cart" className="hover:text-amber-400 text-sm">Cart</Link></li>
+              <li><Link href="/checkout" className="hover:text-amber-400 text-sm">Checkout</Link></li>
             </ul>
           </div>
 
-          {/* Categories */}
+          {/* Legal Pages (NEW) */}
           <div>
-            <h3 className="text-white font-semibold mb-5 text-sm tracking-wider uppercase">
-              Categories
+            <h3 className="text-white font-semibold mb-5 text-sm uppercase tracking-wider">
+              Policies
             </h3>
             <ul className="space-y-3">
               <li>
-                <Link href="/products?category=oud" className="text-sm text-gray-500 hover:text-amber-400 transition-colors">
-                  Oud Collection
+                <Link href="/privacy-policy" className="hover:text-amber-400 text-sm">
+                  Privacy Policy
                 </Link>
               </li>
               <li>
-                <Link href="/products?category=floral" className="text-sm text-gray-500 hover:text-amber-400 transition-colors">
-                  Floral
-                </Link>
-              </li>
-              <li>
-                <Link href="/products?category=fresh" className="text-sm text-gray-500 hover:text-amber-400 transition-colors">
-                  Fresh & Aqua
-                </Link>
-              </li>
-              <li>
-                <Link href="/products?category=oriental" className="text-sm text-gray-500 hover:text-amber-400 transition-colors">
-                  Oriental
+                <Link href="/refund-policy" className="hover:text-amber-400 text-sm">
+                  Refund Policy
                 </Link>
               </li>
             </ul>
@@ -95,24 +86,27 @@ export default function Footer() {
 
           {/* Contact */}
           <div>
-            <h3 className="text-white font-semibold mb-5 text-sm tracking-wider uppercase">
-              Contact Us
+            <h3 className="text-white font-semibold mb-5 text-sm uppercase tracking-wider">
+              Contact
             </h3>
+
             <ul className="space-y-4">
               <li className="flex items-start gap-3">
-                <MapPin className="h-4 w-4 text-amber-400 mt-0.5 flex-shrink-0" />
-                <span className="text-sm text-gray-500">Rawalpindi, Punjab, Pakistan</span>
+                <MapPin className="h-4 w-4 text-amber-400 mt-0.5" />
+                <span className="text-sm">Rawalpindi, Punjab, Pakistan</span>
               </li>
+
               <li className="flex items-center gap-3">
-                <Phone className="h-4 w-4 text-amber-400 flex-shrink-0" />
-                <a href="tel:+923000000000" className="text-sm text-gray-500 hover:text-amber-400 transition-colors">
-                  +92 300 0000000
+                <Phone className="h-4 w-4 text-amber-400" />
+                <a href="tel:03085088464" className="text-sm hover:text-amber-400">
+                  03085088464
                 </a>
               </li>
+
               <li className="flex items-center gap-3">
-                <Mail className="h-4 w-4 text-amber-400 flex-shrink-0" />
-                <a href="mailto:info@aurafresh.pk" className="text-sm text-gray-500 hover:text-amber-400 transition-colors">
-                  info@aurafresh.pk
+                <Mail className="h-4 w-4 text-amber-400" />
+                <a href="mailto:info@aurafresh804.com" className="text-sm hover:text-amber-400">
+                  info@aurafresh804.com
                 </a>
               </li>
             </ul>
@@ -120,16 +114,17 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* Bottom Bar */}
+      {/* Bottom */}
       <div className="border-t border-gray-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="max-w-7xl mx-auto px-4 py-6 flex flex-col md:flex-row justify-between items-center gap-3">
           <p className="text-xs text-gray-600">
             © {new Date().getFullYear()} AuraFresh. All rights reserved.
           </p>
-          <div className="flex items-center gap-6">
-            <span className="text-xs text-gray-600">Cash on Delivery</span>
-            <span className="text-xs text-gray-600">Authentic Products</span>
-            <span className="text-xs text-gray-600">Pakistan Wide Delivery</span>
+
+          <div className="flex gap-6 text-xs text-gray-600">
+            <span>COD Available</span>
+            <span>Authentic Perfumes</span>
+            <span>Pakistan Wide Delivery</span>
           </div>
         </div>
       </div>
