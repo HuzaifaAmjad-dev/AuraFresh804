@@ -1,24 +1,33 @@
 import { NextResponse } from "next/server"
+import { db } from "@/lib/db"
+import { users, orders } from "@/lib/schema"
+import { desc, eq } from "drizzle-orm"
 
 export const dynamic = "force-dynamic"
 
-/* =========================
-   GET ALL CUSTOMERS
-========================= */
 export async function GET() {
-  const { prisma } = await import("@/lib/prisma")
-
-  const customers = await prisma.user.findMany({
-    where: { role: "CUSTOMER" },
-    include: {
-      _count: { select: { orders: true } },
+  const result = await db.query.users.findMany({
+    where: (u, { eq }) => eq(u.role, "CUSTOMER"),
+    with: {
       orders: {
-        orderBy: { createdAt: "desc" },
-        take: 1,
+        orderBy: [desc(orders.createdAt)],
+        limit: 1,
       },
     },
-    orderBy: { createdAt: "desc" },
+    orderBy: [desc(users.createdAt)],
   })
 
-  return NextResponse.json(customers)
+  const withCount = await Promise.all(
+    result.map(async (user) => {
+      const allOrders = await db.query.orders.findMany({
+        where: (o, { eq }) => eq(o.userId, user.id),
+      })
+      return {
+        ...user,
+        _count: { orders: allOrders.length },
+      }
+    })
+  )
+
+  return NextResponse.json(withCount)
 }

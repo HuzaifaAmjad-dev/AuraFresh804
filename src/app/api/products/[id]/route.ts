@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
+import { db } from "@/lib/db"
+import { products } from "@/lib/schema"
+import { eq } from "drizzle-orm"
 import slugify from "slugify"
 
 export const dynamic = "force-dynamic"
@@ -8,11 +11,10 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
-  const { prisma } = await import("@/lib/prisma")
 
-  const product = await prisma.product.findUnique({
-    where: { id },
-    include: { category: true },
+  const product = await db.query.products.findFirst({
+    where: (p, { eq }) => eq(p.id, id),
+    with: { category: true },
   })
 
   if (!product) {
@@ -28,19 +30,16 @@ export async function PUT(
 ) {
   try {
     const { id } = await params
-    const { prisma } = await import("@/lib/prisma")
-
     const body = await req.json()
     const slug = slugify(body.name, { lower: true, strict: true })
 
-    const product = await prisma.product.update({
-      where: { id },
-      data: {
+    await db.update(products)
+      .set({
         name: body.name,
         slug,
         description: body.description,
-        price: parseFloat(body.price),
-        comparePrice: body.comparePrice ? parseFloat(body.comparePrice) : null,
+        price: parseFloat(body.price).toString(),
+        comparePrice: body.comparePrice ? parseFloat(body.comparePrice).toString() : null,
         images: body.images || [],
         stock: parseInt(body.stock) || 0,
         isActive: body.isActive ?? true,
@@ -53,7 +52,12 @@ export async function PUT(
         baseNotes: body.baseNotes || [],
         occasion: body.occasion || null,
         season: body.season || null,
-      },
+        updatedAt: new Date(),
+      })
+      .where(eq(products.id, id))
+
+    const product = await db.query.products.findFirst({
+      where: (p, { eq }) => eq(p.id, id),
     })
 
     return NextResponse.json(product)
@@ -71,15 +75,11 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params
-    const { prisma } = await import("@/lib/prisma")
 
-    await prisma.product.delete({ where: { id } })
+    await db.delete(products).where(eq(products.id, id))
 
     return NextResponse.json({ success: true })
   } catch {
-    return NextResponse.json(
-      { error: "Failed to delete product" },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Failed to delete product" }, { status: 500 })
   }
 }

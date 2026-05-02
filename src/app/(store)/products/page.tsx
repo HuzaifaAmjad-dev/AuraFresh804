@@ -1,26 +1,26 @@
-import { prisma } from "@/lib/prisma"
+import { db } from "@/lib/db"
+import { products } from "@/lib/schema"
+import { desc } from "drizzle-orm"
 import ProductCard from "@/components/store/ProductCard"
 import { Package } from "lucide-react"
-import { serializeProducts } from "@/lib/serialize"
+import Link from "next/link"
 
 export const dynamic = "force-dynamic"
 
 async function getProducts(category?: string) {
-  const products = await prisma.product.findMany({
-    where: {
-      isActive: true,
-      ...(category ? { category: { slug: category } } : {}),
-    },
-    include: { category: true },
-    orderBy: { createdAt: "desc" },
+  const result = await db.query.products.findMany({
+    where: (p, { eq }) => eq(p.isActive, true),
+    with: { category: true },
+    orderBy: [desc(products.createdAt)],
   })
 
-  return serializeProducts(products)
+  if (!category) return result
+  return result.filter((p) => p.category?.slug === category)
 }
 
 async function getCategories() {
-  return prisma.category.findMany({
-    orderBy: { name: "asc" },
+  return db.query.categories.findMany({
+    orderBy: (c, { asc }) => [asc(c.name)],
   })
 }
 
@@ -30,65 +30,56 @@ export const metadata = {
 }
 
 type Props = {
-  searchParams: {
-    category?: string
-  }
+  searchParams: { category?: string }
 }
 
 export default async function ProductsPage({ searchParams }: Props) {
-  const category = searchParams?.category
+  const { category } = searchParams
 
-  const [products, categories] = await Promise.all([
+  const [productList, categoryList] = await Promise.all([
     getProducts(category),
     getCategories(),
   ])
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-12">
+      <h1 className="text-3xl font-bold mb-6">All Perfumes</h1>
 
-      <h1 className="text-3xl font-bold mb-6">
-        All Perfumes
-      </h1>
-
-      {/* FILTERS */}
       <div className="flex gap-2 flex-wrap mb-8">
-        <a
+        <Link
           href="/products"
           className={`px-4 py-2 rounded-full ${
             !category ? "bg-black text-white" : "bg-gray-100"
           }`}
         >
           All
-        </a>
+        </Link>
 
-        {categories.map((cat: any) => (
-          <a
+        {categoryList.map((cat) => (
+          <Link
             key={cat.id}
             href={`/products?category=${cat.slug}`}
             className={`px-4 py-2 rounded-full ${
-              category === cat.slug
-                ? "bg-black text-white"
-                : "bg-gray-100"
+              category === cat.slug ? "bg-black text-white" : "bg-gray-100"
             }`}
           >
             {cat.name}
-          </a>
+          </Link>
         ))}
       </div>
 
-      {/* PRODUCTS */}
-      {products.length === 0 ? (
+      {productList.length === 0 ? (
         <div className="text-center py-20">
           <Package className="mx-auto mb-3" />
-          No products found
+          <p>No products found</p>
         </div>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {products.map((product: any) => (
+          {productList.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
         </div>
       )}
     </div>
- )
+  )
 }

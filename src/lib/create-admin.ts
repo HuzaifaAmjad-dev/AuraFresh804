@@ -1,22 +1,31 @@
 import "dotenv/config"
-import { prisma } from "./prisma"
+import { db } from "./db"
+import { users } from "./schema"
+import { eq } from "drizzle-orm"
+import { createId } from "@paralleldrive/cuid2"
 import bcrypt from "bcryptjs"
-export const dynamic = "force-dynamic"
+
 async function createAdmin() {
   const hashedPassword = await bcrypt.hash("admin123", 12)
 
-  const admin = await prisma.user.upsert({
-    where: { email: "admin@aurafresh.pk" },
-    update: {},
-    create: {
-      name: "Admin",
-      email: "admin@aurafresh.pk",
-      password: hashedPassword,
-      role: "ADMIN",
-    },
+  const existing = await db.query.users.findFirst({
+    where: (u, { eq }) => eq(u.email, "admin@aurafresh.pk"),
   })
 
-  console.log("✅ Admin created:", admin.email)
+  if (existing) {
+    console.log("✅ Admin already exists:", existing.email)
+    process.exit(0)
+  }
+
+  await db.insert(users).values({
+    id: createId(),
+    name: "Admin",
+    email: "admin@aurafresh.pk",
+    password: hashedPassword,
+    role: "ADMIN",
+  })
+
+  console.log("✅ Admin created: admin@aurafresh.pk")
   process.exit(0)
 }
 

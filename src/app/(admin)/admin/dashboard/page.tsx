@@ -1,16 +1,18 @@
-import { prisma } from "@/lib/prisma"
+import { db } from "@/lib/db"
+import { orders, products, users } from "@/lib/schema"
+import { eq, count } from "drizzle-orm"
 import { ShoppingBag, Package, Users, TrendingUp } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-export const dynamic = "force-dynamic"
-async function getStats() {
-  console.log("DATABASE_URL =", process.env.DATABASE_URL)
 
+export const dynamic = "force-dynamic"
+
+async function getStats() {
   const [totalOrders, totalProducts, totalCustomers, pendingOrders] =
     await Promise.all([
-      prisma.order.count(),
-      prisma.product.count(),
-      prisma.user.count({ where: { role: "CUSTOMER" } }),
-      prisma.order.count({ where: { status: "PENDING" } }),
+      db.select({ count: count() }).from(orders).then((r) => r[0].count),
+      db.select({ count: count() }).from(products).then((r) => r[0].count),
+      db.select({ count: count() }).from(users).where(eq(users.role, "CUSTOMER")).then((r) => r[0].count),
+      db.select({ count: count() }).from(orders).where(eq(orders.status, "PENDING")).then((r) => r[0].count),
     ])
 
   return { totalOrders, totalProducts, totalCustomers, pendingOrders }

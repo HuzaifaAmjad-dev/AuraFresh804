@@ -1,4 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
+import { db } from "@/lib/db"
+import { orders, orderStatusLogs } from "@/lib/schema"
+import { eq } from "drizzle-orm"
+import { createId } from "@paralleldrive/cuid2"
 
 export const dynamic = "force-dynamic"
 
@@ -7,15 +11,12 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
-  const { prisma } = await import("@/lib/prisma")
 
-  const order = await prisma.order.findUnique({
-    where: { id },
-    include: {
-      items: { include: { product: true } },
-      statusLogs: {
-        orderBy: { createdAt: "desc" },
-      },
+  const order = await db.query.orders.findFirst({
+    where: (o, { eq }) => eq(o.id, id),
+    with: {
+      items: { with: { product: true } },
+      statusLogs: true,
     },
   })
 
@@ -32,32 +33,30 @@ export async function PUT(
 ) {
   try {
     const { id } = await params
-    const { prisma } = await import("@/lib/prisma")
-
     const body = await req.json()
 
-    const order = await prisma.order.update({
-      where: { id },
-      data: {
+    await db.update(orders)
+      .set({
         status: body.status,
         paymentStatus: body.paymentStatus,
-      },
+        updatedAt: new Date(),
+      })
+      .where(eq(orders.id, id))
+
+    await db.insert(orderStatusLogs).values({
+      id: createId(),
+      orderId: id,
+      status: body.status,
+      note: body.note || null,
     })
 
-    await prisma.orderStatusLog.create({
-      data: {
-        orderId: id,
-        status: body.status,
-        note: body.note || null,
-      },
+    const order = await db.query.orders.findFirst({
+      where: (o, { eq }) => eq(o.id, id),
     })
 
     return NextResponse.json(order)
   } catch {
-    return NextResponse.json(
-      { error: "Failed to update order" },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Failed to update order" }, { status: 500 })
   }
 }
 
@@ -67,15 +66,11 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params
-    const { prisma } = await import("@/lib/prisma")
 
-    await prisma.order.delete({ where: { id } })
+    await db.delete(orders).where(eq(orders.id, id))
 
     return NextResponse.json({ success: true })
   } catch {
-    return NextResponse.json(
-      { error: "Failed to delete order" },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Failed to delete order" }, { status: 500 })
   }
 }

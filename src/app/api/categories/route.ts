@@ -1,4 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
+import { db } from "@/lib/db"
+import { categories } from "@/lib/schema"
+import { desc, eq } from "drizzle-orm"
+import { createId } from "@paralleldrive/cuid2"
 import slugify from "slugify"
 import { z } from "zod"
 
@@ -10,29 +14,23 @@ const categorySchema = z.object({
   image: z.string().optional(),
 })
 
-/* =========================
-   GET ALL CATEGORIES
-========================= */
 export async function GET() {
-  const { prisma } = await import("@/lib/prisma")
-
-  const categories = await prisma.category.findMany({
-    include: {
-      _count: { select: { products: true } },
-    },
-    orderBy: { createdAt: "desc" },
+  const result = await db.query.categories.findMany({
+    with: { products: true },
+    orderBy: [desc(categories.createdAt)],
   })
 
-  return NextResponse.json(categories)
+  const withCount = result.map((c) => ({
+    ...c,
+    _count: { products: c.products.length },
+    products: undefined,
+  }))
+
+  return NextResponse.json(withCount)
 }
 
-/* =========================
-   CREATE CATEGORY
-========================= */
 export async function POST(req: NextRequest) {
   try {
-    const { prisma } = await import("@/lib/prisma")
-
     const body = await req.json()
 
     const parsed = categorySchema.safeParse(body)
@@ -41,14 +39,18 @@ export async function POST(req: NextRequest) {
     }
 
     const slug = slugify(parsed.data.name, { lower: true, strict: true })
+    const id = createId()
 
-    const category = await prisma.category.create({
-      data: {
-        name: parsed.data.name,
-        description: parsed.data.description,
-        image: parsed.data.image,
-        slug,
-      },
+    await db.insert(categories).values({
+      id,
+      name: parsed.data.name,
+      description: parsed.data.description,
+      image: parsed.data.image,
+      slug,
+    })
+
+    const category = await db.query.categories.findFirst({
+      where: (c, { eq }) => eq(c.id, id),
     })
 
     return NextResponse.json(category)
