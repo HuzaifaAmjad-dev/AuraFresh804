@@ -1,24 +1,30 @@
-import { prisma } from "@/lib/prisma"
 import { NextRequest, NextResponse } from "next/server"
+
 export const dynamic = "force-dynamic"
+
+/* =========================
+   GET ALL ORDERS
+========================= */
 export async function GET() {
-  try {
-    const orders = await prisma.order.findMany({
-      include: {
-        items: {
-          include: { product: true },
-        },
-      },
-      orderBy: { createdAt: "desc" },
-    })
-    return NextResponse.json(orders)
-  } catch {
-    return NextResponse.json({ error: "Failed to fetch orders" }, { status: 500 })
-  }
+  const { prisma } = await import("@/lib/prisma")
+
+  const orders = await prisma.order.findMany({
+    include: {
+      items: { include: { product: true } },
+    },
+    orderBy: { createdAt: "desc" },
+  })
+
+  return NextResponse.json(orders)
 }
 
+/* =========================
+   CREATE ORDER
+========================= */
 export async function POST(req: NextRequest) {
   try {
+    const { prisma } = await import("@/lib/prisma")
+
     const body = await req.json()
 
     const orderNumber = `AF-${Date.now()}`
@@ -38,6 +44,7 @@ export async function POST(req: NextRequest) {
         total: body.total,
         notes: body.notes || null,
         paymentMethod: body.paymentMethod || "COD",
+
         items: {
           create: body.items.map((item: any) => ({
             productId: item.productId,
@@ -53,8 +60,10 @@ export async function POST(req: NextRequest) {
     })
 
     return NextResponse.json(order)
-  } catch (e) {
-    console.error(e)
-    return NextResponse.json({ error: "Failed to create order" }, { status: 500 })
+  } catch (error: any) {
+    return NextResponse.json(
+      { error: "Failed to create order", details: error.message },
+      { status: 500 }
+    )
   }
 }

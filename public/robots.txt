@@ -1,0 +1,14 @@
+# *
+User-agent: *
+Allow: /
+
+# *
+User-agent: *
+Disallow: /admin
+Disallow: /api
+
+# Host
+Host: https://aurafresh.pk
+
+# Sitemaps
+Sitemap: https://aurafresh.pk/sitemap.xml

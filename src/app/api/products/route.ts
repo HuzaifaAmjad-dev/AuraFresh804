@@ -1,31 +1,26 @@
-import { prisma } from "@/lib/prisma"
 import { NextRequest, NextResponse } from "next/server"
 import slugify from "slugify"
+
 export const dynamic = "force-dynamic"
+
 // GET ALL PRODUCTS
 export async function GET() {
-  try {
-    const products = await prisma.product.findMany({
-      include: { category: true },
-      orderBy: { createdAt: "desc" },
-    })
+  const { prisma } = await import("@/lib/prisma")
 
-    return NextResponse.json(products)
-  } catch (error: any) {
-    console.error("GET PRODUCTS ERROR:", error)
+  const products = await prisma.product.findMany({
+    include: { category: true },
+    orderBy: { createdAt: "desc" },
+  })
 
-    return NextResponse.json(
-      { error: "Failed to fetch products", details: error.message },
-      { status: 500 }
-    )
-  }
+  return NextResponse.json(products)
 }
 
 // CREATE PRODUCT
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json()
+    const { prisma } = await import("@/lib/prisma")
 
+    const body = await req.json()
     const slug = slugify(body.name, { lower: true, strict: true })
 
     const product = await prisma.product.create({
@@ -40,7 +35,6 @@ export async function POST(req: NextRequest) {
         isActive: body.isActive ?? true,
         isFeatured: body.isFeatured ?? false,
         categoryId: body.categoryId,
-
         volume: body.volume || null,
         gender: body.gender || "UNISEX",
         topNotes: body.topNotes || [],
@@ -53,8 +47,6 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(product)
   } catch (error: any) {
-    console.error("CREATE PRODUCT ERROR:", error)
-
     return NextResponse.json(
       { error: "Failed to create product", details: error.message },
       { status: 500 }
