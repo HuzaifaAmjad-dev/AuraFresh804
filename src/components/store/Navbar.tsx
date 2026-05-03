@@ -48,7 +48,7 @@ export default function Navbar() {
     )}>
       {/* Top bar */}
       <div className="bg-amber-500 text-gray-950 text-xs text-center py-2 px-4 font-medium">
-        🚚 Free delivery on orders over Rs. 3,000 &nbsp;|&nbsp; Cash on Delivery Available
+        🚚 Free delivery on orders over Rs. 5,000 &nbsp;|&nbsp; Cash on Delivery Available
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
