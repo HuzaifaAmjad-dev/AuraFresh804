@@ -12,6 +12,7 @@ import {
   ])
   export const paymentStatusEnum = pgEnum("PaymentStatus", ["UNPAID", "PAID", "REFUNDED"])
   
+  
   // Users
   export const users = pgTable("users", {
     id: text("id").primaryKey().$defaultFn(() => createId()),
