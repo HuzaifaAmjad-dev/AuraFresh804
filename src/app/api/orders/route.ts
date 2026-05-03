@@ -7,11 +7,16 @@ import { createId } from "@paralleldrive/cuid2"
 export const dynamic = "force-dynamic"
 
 export async function GET() {
-  const result = await db.query.orders.findMany({
-    with: { items: { with: { product: true } } },
-    orderBy: [desc(orders.createdAt)],
-  })
-  return NextResponse.json(result)
+  try {
+    const result = await db.query.orders.findMany({
+      with: { items: { with: { product: true } } },
+      orderBy: [desc(orders.createdAt)],
+    })
+    return NextResponse.json(result)
+  } catch (error: any) {
+    console.error("Orders GET error:", error)
+    return NextResponse.json({ error: "Failed to fetch orders", details: error.message }, { status: 500 })
+  }
 }
 
 export async function POST(req: NextRequest) {
@@ -35,6 +40,8 @@ export async function POST(req: NextRequest) {
       total: body.total,
       notes: body.notes || null,
       paymentMethod: body.paymentMethod || "COD",
+      createdAt: new Date(),  // 👈 add
+      updatedAt: new Date(),  // 👈 add
     })
 
     await db.insert(orderItems).values(
@@ -45,6 +52,8 @@ export async function POST(req: NextRequest) {
         quantity: item.quantity,
         price: item.price,
         total: item.price * item.quantity,
+        createdAt: new Date(),  // 👈 add
+        updatedAt: new Date(),  // 👈 add
       }))
     )
 
@@ -55,6 +64,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(order)
   } catch (error: any) {
+    console.error("Orders POST error:", error)
     return NextResponse.json(
       { error: "Failed to create order", details: error.message },
       { status: 500 }

@@ -10,21 +10,26 @@ export async function GET(
   _: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = await params
+  try {
+    const { id } = await params
 
-  const order = await db.query.orders.findFirst({
-    where: (o, { eq }) => eq(o.id, id),
-    with: {
-      items: { with: { product: true } },
-      statusLogs: true,
-    },
-  })
+    const order = await db.query.orders.findFirst({
+      where: (o, { eq }) => eq(o.id, id),
+      with: {
+        items: { with: { product: true } },
+        statusLogs: true,
+      },
+    })
 
-  if (!order) {
-    return NextResponse.json({ error: "Order not found" }, { status: 404 })
+    if (!order) {
+      return NextResponse.json({ error: "Order not found" }, { status: 404 })
+    }
+
+    return NextResponse.json(order)
+  } catch (error: any) {
+    console.error("Order GET [id] error:", error)
+    return NextResponse.json({ error: "Failed to fetch order", details: error.message }, { status: 500 })
   }
-
-  return NextResponse.json(order)
 }
 
 export async function PUT(
@@ -43,20 +48,23 @@ export async function PUT(
       })
       .where(eq(orders.id, id))
 
-    await db.insert(orderStatusLogs).values({
-      id: createId(),
-      orderId: id,
-      status: body.status,
-      note: body.note || null,
-    })
+      await db.insert(orderStatusLogs).values({
+        id: createId(),
+        orderId: id,
+        status: body.status,
+        note: body.note || null,
+        createdAt: new Date(),  // keep this
+        // 👈 remove updatedAt
+      })
 
     const order = await db.query.orders.findFirst({
       where: (o, { eq }) => eq(o.id, id),
     })
 
     return NextResponse.json(order)
-  } catch {
-    return NextResponse.json({ error: "Failed to update order" }, { status: 500 })
+  } catch (error: any) {
+    console.error("Order PUT error:", error)
+    return NextResponse.json({ error: "Failed to update order", details: error.message }, { status: 500 })
   }
 }
 
@@ -70,7 +78,8 @@ export async function DELETE(
     await db.delete(orders).where(eq(orders.id, id))
 
     return NextResponse.json({ success: true })
-  } catch {
-    return NextResponse.json({ error: "Failed to delete order" }, { status: 500 })
+  } catch (error: any) {
+    console.error("Order DELETE error:", error)
+    return NextResponse.json({ error: "Failed to delete order", details: error.message }, { status: 500 })
   }
 }

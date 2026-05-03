@@ -8,11 +8,16 @@ import slugify from "slugify"
 export const dynamic = "force-dynamic"
 
 export async function GET() {
-  const result = await db.query.products.findMany({
-    with: { category: true },
-    orderBy: [desc(products.createdAt)],
-  })
-  return NextResponse.json(result)
+  try {
+    const result = await db.query.products.findMany({
+      with: { category: true },
+      orderBy: [desc(products.createdAt)],
+    })
+    return NextResponse.json(result)
+  } catch (error: any) {
+    console.error("Products GET error:", error)
+    return NextResponse.json({ error: "Failed to fetch products", details: error.message }, { status: 500 })
+  }
 }
 
 export async function POST(req: NextRequest) {
@@ -40,6 +45,8 @@ export async function POST(req: NextRequest) {
       baseNotes: body.baseNotes || [],
       occasion: body.occasion || null,
       season: body.season || null,
+      createdAt: new Date(),  // 👈 add
+      updatedAt: new Date(),  // 👈 add
     })
 
     const product = await db.query.products.findFirst({
@@ -48,6 +55,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(product)
   } catch (error: any) {
+    console.error("Products POST error:", error)
     return NextResponse.json(
       { error: "Failed to create product", details: error.message },
       { status: 500 }

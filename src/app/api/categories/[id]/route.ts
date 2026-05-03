@@ -23,8 +23,9 @@ export async function GET(
     }
 
     return NextResponse.json(category)
-  } catch {
-    return NextResponse.json({ error: "Failed to fetch category" }, { status: 500 })
+  } catch (error: any) {
+    console.error("Category GET [id] error:", error)
+    return NextResponse.json({ error: "Failed to fetch category", details: error.message }, { status: 500 })
   }
 }
 
@@ -46,8 +47,9 @@ export async function PUT(
     })
 
     return NextResponse.json(updated)
-  } catch {
-    return NextResponse.json({ error: "Failed to update category" }, { status: 500 })
+  } catch (error: any) {
+    console.error("Category PUT error:", error)
+    return NextResponse.json({ error: "Failed to update category", details: error.message }, { status: 500 })
   }
 }
 
@@ -61,7 +63,8 @@ export async function DELETE(
     await db.delete(categories).where(eq(categories.id, id))
 
     return NextResponse.json({ success: true })
-  } catch {
-    return NextResponse.json({ error: "Failed to delete category" }, { status: 500 })
+  } catch (error: any) {
+    console.error("Category DELETE error:", error)
+    return NextResponse.json({ error: "Failed to delete category", details: error.message }, { status: 500 })
   }
 }

@@ -10,18 +10,23 @@ export async function GET(
   _: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = await params
+  try {
+    const { id } = await params
 
-  const product = await db.query.products.findFirst({
-    where: (p, { eq }) => eq(p.id, id),
-    with: { category: true },
-  })
+    const product = await db.query.products.findFirst({
+      where: (p, { eq }) => eq(p.id, id),
+      with: { category: true },
+    })
 
-  if (!product) {
-    return NextResponse.json({ error: "Product not found" }, { status: 404 })
+    if (!product) {
+      return NextResponse.json({ error: "Product not found" }, { status: 404 })
+    }
+
+    return NextResponse.json(product)
+  } catch (error: any) {
+    console.error("Product GET [id] error:", error)
+    return NextResponse.json({ error: "Failed to fetch product", details: error.message }, { status: 500 })
   }
-
-  return NextResponse.json(product)
 }
 
 export async function PUT(
@@ -62,6 +67,7 @@ export async function PUT(
 
     return NextResponse.json(product)
   } catch (error: any) {
+    console.error("Product PUT error:", error)
     return NextResponse.json(
       { error: "Failed to update product", details: error.message },
       { status: 500 }
@@ -79,7 +85,8 @@ export async function DELETE(
     await db.delete(products).where(eq(products.id, id))
 
     return NextResponse.json({ success: true })
-  } catch {
-    return NextResponse.json({ error: "Failed to delete product" }, { status: 500 })
+  } catch (error: any) {
+    console.error("Product DELETE error:", error)
+    return NextResponse.json({ error: "Failed to delete product", details: error.message }, { status: 500 })
   }
 }
