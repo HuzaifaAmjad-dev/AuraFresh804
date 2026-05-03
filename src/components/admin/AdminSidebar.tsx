@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { signOut } from "next-auth/react"
+import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import {
   LayoutDashboard,
@@ -25,6 +25,7 @@ const navItems = [
 
 export default function AdminSidebar() {
   const pathname = usePathname()
+  const router = useRouter()
 
   return (
     <aside className="w-64 bg-white border-r flex flex-col">
@@ -67,10 +68,10 @@ export default function AdminSidebar() {
         <Button
           variant="ghost"
           className="w-full justify-start text-red-500 hover:text-red-600 hover:bg-red-50"
-          onClick={() => signOut({ callbackUrl: "/admin/login" })}
+          onClick={() => router.push("/")}
         >
           <LogOut className="h-5 w-5 mr-3" />
-          Sign Out
+          Exit Admin
         </Button>
       </div>
     </aside>
