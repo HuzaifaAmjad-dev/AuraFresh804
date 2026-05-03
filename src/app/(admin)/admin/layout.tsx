@@ -1,3 +1,5 @@
+import { auth } from "@/app/api/auth/[...nextauth]/route"
+import { redirect } from "next/navigation"
 import { Toaster } from "sonner"
 import AdminSidebar from "@/components/admin/AdminSidebar"
 
@@ -6,6 +8,12 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode
 }) {
+  const session = await auth()
+
+  if (!session?.user) {
+    redirect("/admin/login")
+  }
+
   return (
     <div className="flex h-screen bg-gray-100">
       <AdminSidebar />
