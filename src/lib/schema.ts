@@ -18,6 +18,7 @@ import {
     id: text("id").primaryKey().$defaultFn(() => createId()),
     name: text("name"),
     email: text("email").notNull().unique(),
+    phone: text("phone").notNull(), // ✅ ADD THIS
     emailVerified: timestamp("emailVerified"),
     image: text("image"),
     password: text("password"),
@@ -92,6 +93,31 @@ import {
     updatedAt: timestamp("updatedAt").defaultNow(),
   })
   
+  export const reviews = pgTable(
+    "reviews",
+    {
+      id: text("id").primaryKey().$defaultFn(() => createId()),
+      productId: text("productId")
+        .notNull()
+        .references(() => products.id, { onDelete: "cascade" }),
+  
+      userId: text("userId").references(() => users.id, { onDelete: "cascade" }),
+  
+      rating: integer("rating").notNull(), // 1–5
+      comment: text("comment"),
+  
+      createdAt: timestamp("createdAt").defaultNow(),
+    },
+    (table) => ({
+      // ✅ one review per user per product
+      uniqueUserReview: uniqueIndex("unique_user_review").on(
+        table.productId,
+        table.userId
+      ),
+    })
+  )
+
+
   // Orders
   export const orders = pgTable("orders", {
     id: text("id").primaryKey().$defaultFn(() => createId()),
@@ -177,4 +203,16 @@ export const usersRelations = relations(users, ({ many }) => ({
   
   export const sessionsRelations = relations(sessions, ({ one }) => ({
     user: one(users, { fields: [sessions.userId], references: [users.id] }),
+  }))
+
+  
+  export const reviewsRelations = relations(reviews, ({ one }) => ({
+    product: one(products, {
+      fields: [reviews.productId],
+      references: [products.id],
+    }),
+    user: one(users, {
+      fields: [reviews.userId],
+      references: [users.id],
+    }),
   }))

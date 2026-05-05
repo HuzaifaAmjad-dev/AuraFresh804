@@ -1,21 +1,38 @@
 import { db } from "@/lib/db"
-import { products } from "@/lib/schema"
-import { desc } from "drizzle-orm"
+import { products, categories } from "@/lib/schema"
+import { desc, eq, and, inArray } from "drizzle-orm"
 import ProductCard from "@/components/store/ProductCard"
 import { Package } from "lucide-react"
 import Link from "next/link"
 
 export const dynamic = "force-dynamic"
+export const revalidate = 60 // cache for 60s (better performance)
 
 async function getProducts(category?: string) {
-  const result = await db.query.products.findMany({
-    where: (p, { eq }) => eq(p.isActive, true),
+  // No category → simple query
+  if (!category) {
+    return db.query.products.findMany({
+      where: (p, { eq }) => eq(p.isActive, true),
+      with: { category: true },
+      orderBy: [desc(products.createdAt)],
+    })
+  }
+
+  // ✅ Single query with subquery (efficient)
+  const categorySubquery = db
+    .select({ id: categories.id })
+    .from(categories)
+    .where(eq(categories.slug, category))
+
+  return db.query.products.findMany({
+    where: (p) =>
+      and(
+        eq(p.isActive, true),
+        inArray(p.categoryId, categorySubquery)
+      ),
     with: { category: true },
     orderBy: [desc(products.createdAt)],
   })
-
-  if (!category) return result
-  return result.filter((p) => p.category?.slug === category)
 }
 
 async function getCategories() {
@@ -30,11 +47,11 @@ export const metadata = {
 }
 
 type Props = {
-  searchParams: { category?: string }
+  searchParams: Promise<{ category?: string }>
 }
 
 export default async function ProductsPage({ searchParams }: Props) {
-  const { category } = searchParams
+  const { category } = await searchParams
 
   const [productList, categoryList] = await Promise.all([
     getProducts(category),
@@ -45,6 +62,7 @@ export default async function ProductsPage({ searchParams }: Props) {
     <div className="max-w-7xl mx-auto px-4 py-12">
       <h1 className="text-3xl font-bold mb-6">All Perfumes</h1>
 
+      {/* Categories */}
       <div className="flex gap-2 flex-wrap mb-8">
         <Link
           href="/products"
@@ -68,6 +86,7 @@ export default async function ProductsPage({ searchParams }: Props) {
         ))}
       </div>
 
+      {/* Products */}
       {productList.length === 0 ? (
         <div className="text-center py-20">
           <Package className="mx-auto mb-3" />

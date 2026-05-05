@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { Mail, Phone, MapPin } from "lucide-react"
+import { FaFacebookF, FaInstagram, FaTiktok } from "react-icons/fa"
 
 export default function Footer() {
   return (
@@ -26,30 +27,30 @@ export default function Footer() {
 
             {/* Socials */}
             <div className="flex gap-3">
-              <a
-                href="https://www.facebook.com/Aurafresh804"
-                target="_blank"
-                className="h-9 w-9 rounded-lg bg-gray-800 flex items-center justify-center text-gray-400 hover:bg-amber-500 hover:text-white transition"
-              >
-                FB
-              </a>
+  <a
+    href="https://www.facebook.com/Aurafresh804"
+    target="_blank"
+    className="h-9 w-9 rounded-lg bg-gray-800 flex items-center justify-center text-gray-400 hover:bg-amber-500 hover:text-white transition"
+  >
+    <FaFacebookF size={16} />
+  </a>
 
-              <a
-                href="https://www.instagram.com/aurafresh804/"
-                target="_blank"
-                className="h-9 w-9 rounded-lg bg-gray-800 flex items-center justify-center text-gray-400 hover:bg-amber-500 hover:text-white transition"
-              >
-                IG
-              </a>
+  <a
+    href="https://www.instagram.com/aurafresh804/"
+    target="_blank"
+    className="h-9 w-9 rounded-lg bg-gray-800 flex items-center justify-center text-gray-400 hover:bg-amber-500 hover:text-white transition"
+  >
+    <FaInstagram size={16} />
+  </a>
 
-              <a
-                href="https://www.tiktok.com/@aurafresh804"
-                target="_blank"
-                className="h-9 w-9 rounded-lg bg-gray-800 flex items-center justify-center text-gray-400 hover:bg-amber-500 hover:text-white transition"
-              >
-                TT
-              </a>
-            </div>
+  <a
+    href="https://www.tiktok.com/@aurafresh804"
+    target="_blank"
+    className="h-9 w-9 rounded-lg bg-gray-800 flex items-center justify-center text-gray-400 hover:bg-amber-500 hover:text-white transition"
+  >
+    <FaTiktok size={16} />
+  </a>
+</div>
           </div>
 
           {/* Quick Links */}
@@ -106,7 +107,7 @@ export default function Footer() {
               <li className="flex items-center gap-3">
                 <Mail className="h-4 w-4 text-amber-400" />
                 <a href="mailto:info@aurafresh804.com" className="text-sm hover:text-amber-400">
-                  info@aurafresh804.com
+                  aizaz@aurafresh804.com
                 </a>
               </li>
             </ul>

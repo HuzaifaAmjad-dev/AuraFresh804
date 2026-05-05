@@ -3,6 +3,8 @@ import { db } from "@/lib/db"
 import { orders, orderItems } from "@/lib/schema"
 import { desc } from "drizzle-orm"
 import { createId } from "@paralleldrive/cuid2"
+import { cookies } from "next/headers"
+import { verifyToken } from "@/lib/auth"
 
 export const dynamic = "force-dynamic"
 
@@ -12,22 +14,36 @@ export async function GET() {
       with: { items: { with: { product: true } } },
       orderBy: [desc(orders.createdAt)],
     })
+
     return NextResponse.json(result)
   } catch (error: any) {
-    console.error("Orders GET error:", error)
-    return NextResponse.json({ error: "Failed to fetch orders", details: error.message }, { status: 500 })
+    return NextResponse.json(
+      { error: "Failed to fetch orders", details: error.message },
+      { status: 500 }
+    )
   }
 }
 
 export async function POST(req: NextRequest) {
   try {
+    // ✅ FIX: cookies must be awaited inside function
+    const cookieStore = await cookies()
+    const token = cookieStore.get("token")?.value
+
+    let userId = null
+
+    if (token) {
+      const user = await verifyToken(token) as any
+      userId = user.id
+    }
+
     const body = await req.json()
-    const orderNumber = `AF-${Date.now()}`
     const orderId = createId()
 
     await db.insert(orders).values({
       id: orderId,
-      orderNumber,
+      orderNumber: `AF-${Date.now()}`,
+      userId,
       customerName: body.customerName,
       customerEmail: body.customerEmail,
       customerPhone: body.customerPhone,
@@ -40,8 +56,8 @@ export async function POST(req: NextRequest) {
       total: body.total,
       notes: body.notes || null,
       paymentMethod: body.paymentMethod || "COD",
-      createdAt: new Date(),  // 👈 add
-      updatedAt: new Date(),  // 👈 add
+      createdAt: new Date(),
+      updatedAt: new Date(),
     })
 
     await db.insert(orderItems).values(
@@ -52,8 +68,6 @@ export async function POST(req: NextRequest) {
         quantity: item.quantity,
         price: item.price,
         total: item.price * item.quantity,
-        createdAt: new Date(),  // 👈 add
-        updatedAt: new Date(),  // 👈 add
       }))
     )
 
@@ -64,7 +78,6 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(order)
   } catch (error: any) {
-    console.error("Orders POST error:", error)
     return NextResponse.json(
       { error: "Failed to create order", details: error.message },
       { status: 500 }

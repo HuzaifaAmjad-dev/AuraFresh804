@@ -65,7 +65,7 @@ export default function CartPage() {
     (sum, item) => sum + item.price * item.quantity,
     0
   )
-  const shipping = subtotal > 3000 ? 0 : 200
+  const shipping = subtotal > 5000 ? 0 : 200
   const total = subtotal + shipping
 
   if (!mounted) return null
@@ -172,7 +172,7 @@ export default function CartPage() {
               </div>
               {shipping > 0 && (
                 <p className="text-xs text-gray-400">
-                  Free shipping on orders over Rs. 3,000
+                  Free shipping on orders over Rs. 5,000
                 </p>
               )}
               <div className="border-t pt-3 flex justify-between font-bold text-gray-900">
