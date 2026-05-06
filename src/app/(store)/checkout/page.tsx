@@ -23,7 +23,7 @@ interface CartItem {
 
 export default function CheckoutPage() {
   const router = useRouter()
-
+  const [previewImage, setPreviewImage] = useState<string | null>(null)
   const [cart, setCart] = useState<CartItem[]>([])
   const [mounted, setMounted] = useState(false)
   const [placing, setPlacing] = useState(false)

@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Textarea } from "@/components/ui/textarea"
 import {
   Select,
   SelectContent,
@@ -17,6 +16,7 @@ import {
 import { toast } from "sonner"
 import { Upload, X, Loader2 } from "lucide-react"
 import Image from "next/image"
+import RichTextEditor from "@/components/ui/RichTextEditor"
 
 interface Category {
   id: string
@@ -56,26 +56,15 @@ export default function NewProductPage() {
   async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const files = e.target.files
     if (!files || files.length === 0) return
-  
     setUploading(true)
-  
     try {
       for (const file of Array.from(files)) {
         const formData = new FormData()
         formData.append("file", file)
-  
-        const res = await fetch("/api/upload", {
-          method: "POST",
-          body: formData,
-        })
-  
+        const res = await fetch("/api/upload", { method: "POST", body: formData })
         const data = await res.json()
-  
-        if (data.url) {
-          setImages((prev) => [...prev, data.url])
-        }
+        if (data.url) setImages((prev) => [...prev, data.url])
       }
-  
       toast.success("Images uploaded!")
     } catch (err) {
       console.error(err)
@@ -112,7 +101,6 @@ export default function NewProductPage() {
           baseNotes: form.baseNotes.split(",").map((s) => s.trim()).filter(Boolean),
         }),
       })
-
       if (!res.ok) throw new Error()
       toast.success("Product created!")
       router.push("/admin/products")
@@ -144,6 +132,7 @@ export default function NewProductPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
+
           {/* Basic Info */}
           <Card>
             <CardHeader>
@@ -158,15 +147,17 @@ export default function NewProductPage() {
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                 />
               </div>
+
+              {/* ✅ Rich Text Editor replaces plain Textarea */}
               <div className="space-y-2">
                 <Label>Description</Label>
-                <Textarea
-                  placeholder="Describe the perfume..."
-                  rows={4}
+                <RichTextEditor
                   value={form.description}
-                  onChange={(e) => setForm({ ...form, description: e.target.value })}
+                  onChange={(html) => setForm({ ...form, description: html })}
+                  placeholder="Describe the perfume — bold key notes, italicise moods..."
                 />
               </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Price (Rs.)</Label>
@@ -291,31 +282,21 @@ export default function NewProductPage() {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label>Category</Label>
-                <Select
-                  value={form.categoryId}
-                  onValueChange={(v) => setForm({ ...form, categoryId: v })}
-                >
+                <Select value={form.categoryId} onValueChange={(v) => setForm({ ...form, categoryId: v })}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
                   <SelectContent>
                     {categories.map((cat) => (
-                      <SelectItem key={cat.id} value={cat.id}>
-                        {cat.name}
-                      </SelectItem>
+                      <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
                 <Label>Gender</Label>
-                <Select
-                  value={form.gender}
-                  onValueChange={(v) => setForm({ ...form, gender: v })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
+                <Select value={form.gender} onValueChange={(v) => setForm({ ...form, gender: v })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="MALE">Male</SelectItem>
                     <SelectItem value="FEMALE">Female</SelectItem>
