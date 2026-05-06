@@ -65,19 +65,13 @@ export default function OrderDetailPage() {
 
   const [previewImage, setPreviewImage] = useState<string | null>(null)
 
-  // ✅ FIX: safe image handler
-  const safeImage = (img?: string) =>
-    img?.startsWith("http") ? img : getImageUrl(img || "")
-
   useEffect(() => {
     if (!id) return
 
     const load = async () => {
       try {
         const res = await fetch(`/api/orders/${id}`)
-        if (!res.ok) throw new Error()
-
-        const data: Order = await res.json()
+        const data = await res.json()
 
         setOrder(data)
         setStatus(data.status)
@@ -99,16 +93,17 @@ export default function OrderDetailPage() {
       const res = await fetch(`/api/orders/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          status,
-          paymentStatus,
-        }),
+        body: JSON.stringify({ status, paymentStatus }),
       })
 
-      if (!res.ok) throw new Error()
+      const updated = await res.json()
 
-      const updated: Order = await res.json()
-      setOrder(updated)
+      // IMPORTANT FIX: preserve items (prevents “image disappearing bug”)
+      setOrder((prev) => ({
+        ...prev!,
+        status: updated.status,
+        paymentStatus: updated.paymentStatus,
+      }))
 
       toast.success("Order updated")
     } catch {
@@ -131,7 +126,6 @@ export default function OrderDetailPage() {
   return (
     <div className="space-y-6 max-w-5xl">
 
-      {/* HEADER */}
       <div>
         <h1 className="text-2xl font-bold">{order.orderNumber}</h1>
         <p className="text-gray-500">
@@ -151,55 +145,32 @@ export default function OrderDetailPage() {
             </CardHeader>
 
             <CardContent className="space-y-4">
+              {(order.items ?? []).map((item) => (
+                <div key={item.id} className="flex gap-4">
 
-              {/* ✅ FIX: safe array check */}
-              {Array.isArray(order.items) && order.items.length ? (
-                order.items.map((item) => (
-                  <div key={item.id} className="flex gap-4">
-
-                    <div className="w-20 h-20 relative">
-                      {item.product?.images?.length ? (
-                        <Image
-                          src={safeImage(item.product.images?.[0])}
-                          alt={item.product.name}
-                          fill
-                          className="object-cover rounded-lg"
-                        />
-                      ) : (
-                        <Package className="w-6 h-6 text-gray-400" />
-                      )}
-                    </div>
-
-                    <div className="flex-1">
-                      <p className="font-medium">{item.product.name}</p>
-                      <p className="text-sm text-gray-500">
-                        {item.quantity} × Rs. {item.price}
-                      </p>
-                    </div>
-
-                    <p className="font-semibold">Rs. {item.total}</p>
+                  <div className="w-20 h-20 relative">
+                    {item.product?.images?.[0] ? (
+                      <Image
+                        src={getImageUrl(item.product.images[0])}
+                        alt={item.product.name}
+                        fill
+                        className="object-cover rounded-lg"
+                      />
+                    ) : (
+                      <Package className="w-6 h-6 text-gray-400" />
+                    )}
                   </div>
-                ))
-              ) : (
-                <p className="text-gray-400">No items</p>
-              )}
 
-              {/* TOTALS */}
-              <div className="border-t pt-4 space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span>Subtotal</span>
-                  <span>Rs. {order.subtotal}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span>Shipping</span>
-                  <span>Rs. {order.shippingCost}</span>
-                </div>
-                <div className="flex justify-between font-bold">
-                  <span>Total</span>
-                  <span>Rs. {order.total}</span>
-                </div>
-              </div>
+                  <div className="flex-1">
+                    <p className="font-medium">{item.product.name}</p>
+                    <p className="text-sm text-gray-500">
+                      {item.quantity} × Rs. {item.price}
+                    </p>
+                  </div>
 
+                  <p className="font-semibold">Rs. {item.total}</p>
+                </div>
+              ))}
             </CardContent>
           </Card>
 
@@ -220,13 +191,11 @@ export default function OrderDetailPage() {
                 {order.address}, {order.city}, {order.province}
               </p>
 
-              {/* NOTES FIX */}
-              {order.notes?.trim() && (
+              {/* NOTES FIXED */}
+              {order.notes && (
                 <div className="mt-3">
                   <p className="text-sm text-gray-500">Order Notes</p>
-                  <p className="font-medium text-gray-900">
-                    {order.notes}
-                  </p>
+                  <p className="font-medium">{order.notes}</p>
                 </div>
               )}
 
@@ -235,30 +204,28 @@ export default function OrderDetailPage() {
                 {order.paymentMethod}
               </p>
 
-              {order.payerName && (
-                <p><b>Payer:</b> {order.payerName}</p>
-              )}
+              {order.payerName && <p><b>Payer:</b> {order.payerName}</p>}
 
-              {/* PAYMENT IMAGE FIX */}
+              {/* PAYMENT IMAGE FIXED */}
               {order.paymentScreenshot && (
                 <div className="mt-3">
                   <p className="font-semibold mb-2">Payment Screenshot</p>
 
                   <div
-                    className="cursor-pointer inline-block"
                     onClick={() =>
-                      setPreviewImage(safeImage(order.paymentScreenshot))
+                      setPreviewImage(getImageUrl(order.paymentScreenshot!))
                     }
+                    className="cursor-pointer"
                   >
                     <Image
-                      src={safeImage(order.paymentScreenshot)}
-                      width={220}
-                      height={220}
-                      className="rounded-lg border shadow hover:scale-105 transition"
+                      src={getImageUrl(order.paymentScreenshot)}
+                      width={200}
+                      height={200}
+                      className="rounded-lg border"
                       alt="payment"
                     />
-                    <p className="text-xs text-blue-500 mt-1">
-                      Click to view full size
+                    <p className="text-xs text-blue-500">
+                      Click to open
                     </p>
                   </div>
                 </div>
@@ -271,7 +238,6 @@ export default function OrderDetailPage() {
 
         {/* RIGHT */}
         <div>
-
           <Card>
             <CardHeader>
               <CardTitle>Update Order</CardTitle>
@@ -280,9 +246,7 @@ export default function OrderDetailPage() {
             <CardContent className="space-y-4">
 
               <Select value={status} onValueChange={setStatus}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Status" />
-                </SelectTrigger>
+                <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="PENDING">PENDING</SelectItem>
                   <SelectItem value="CONFIRMED">CONFIRMED</SelectItem>
@@ -294,9 +258,7 @@ export default function OrderDetailPage() {
               </Select>
 
               <Select value={paymentStatus} onValueChange={setPaymentStatus}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Payment Status" />
-                </SelectTrigger>
+                <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="UNPAID">UNPAID</SelectItem>
                   <SelectItem value="PAID">PAID</SelectItem>
@@ -304,17 +266,12 @@ export default function OrderDetailPage() {
                 </SelectContent>
               </Select>
 
-              <Button
-                onClick={updateOrder}
-                disabled={updating}
-                className="w-full"
-              >
+              <Button onClick={updateOrder} disabled={updating} className="w-full">
                 {updating ? "Updating..." : "Update Order"}
               </Button>
 
             </CardContent>
           </Card>
-
         </div>
 
       </div>
@@ -322,38 +279,33 @@ export default function OrderDetailPage() {
       {/* MODAL */}
       {previewImage && (
         <div
-          className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
           onClick={() => setPreviewImage(null)}
         >
-          <div
-            className="relative max-w-5xl w-full flex justify-center"
-            onClick={(e) => e.stopPropagation()}
-          >
-
-            <button
-              onClick={() => setPreviewImage(null)}
-              className="absolute -top-10 right-0 text-white bg-white/20 px-3 py-1 rounded"
-            >
-              Close ✕
-            </button>
+          <div onClick={(e) => e.stopPropagation()} className="relative">
 
             <a
               href={previewImage}
               download
-              target="_blank"
-              className="absolute -top-10 left-0 text-white bg-green-600 px-3 py-1 rounded"
+              className="absolute top-2 left-2 bg-green-600 text-white px-3 py-1 rounded"
             >
-              Download ⬇
+              Download
             </a>
+
+            <button
+              onClick={() => setPreviewImage(null)}
+              className="absolute top-2 right-2 bg-white px-3 py-1 rounded"
+            >
+              ✕
+            </button>
 
             <Image
               src={previewImage}
-              alt="full"
-              width={1000}
-              height={1000}
-              className="max-h-[85vh] w-auto object-contain rounded-xl"
+              alt="preview"
+              width={900}
+              height={900}
+              className="max-h-[85vh] w-auto object-contain"
             />
-
           </div>
         </div>
       )}
