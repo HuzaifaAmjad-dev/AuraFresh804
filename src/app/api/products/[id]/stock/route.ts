@@ -5,13 +5,12 @@ import { eq } from "drizzle-orm"
 
 export const dynamic = "force-dynamic"
 
-type Params = {
-  params: { id: string }
-}
-
-export async function PATCH(req: NextRequest, context: Params) {
+export async function PATCH(
+  req: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
   try {
-    const { id } = context.params
+    const { id } = await context.params
     const body = await req.json()
 
     const quantity = Number(body.quantity || 0)
