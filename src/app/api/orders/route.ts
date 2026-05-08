@@ -26,40 +26,50 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
-    // ✅ FIX: cookies must be awaited inside function
     const cookieStore = await cookies()
     const token = cookieStore.get("token")?.value
 
     let userId = null
 
     if (token) {
-      const user = await verifyToken(token) as any
+      const user = (await verifyToken(token)) as any
       userId = user.id
     }
 
     const body = await req.json()
     const orderId = createId()
 
+    // 1. Create order
     await db.insert(orders).values({
       id: orderId,
       orderNumber: `AF-${Date.now()}`,
       userId,
+
       customerName: body.customerName,
       customerEmail: body.customerEmail,
       customerPhone: body.customerPhone,
+
       address: body.address,
       city: body.city,
       province: body.province,
       postalCode: body.postalCode || null,
+
       subtotal: body.subtotal,
       shippingCost: body.shippingCost || 0,
       total: body.total,
+
       notes: body.notes || null,
       paymentMethod: body.paymentMethod || "COD",
+
+      payerName: body.payerName ?? null,
+      paymentScreenshot: body.paymentScreenshot ?? null,
+      amountSent: body.amountSent ?? null,
+
       createdAt: new Date(),
       updatedAt: new Date(),
     })
 
+    // 2. Insert items
     await db.insert(orderItems).values(
       body.items.map((item: any) => ({
         id: createId(),
@@ -70,6 +80,21 @@ export async function POST(req: NextRequest) {
         total: item.price * item.quantity,
       }))
     )
+
+    // 3. 🔥 UPDATE STOCK (FIXED)
+    for (const item of body.items) {
+      await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/products/${item.productId}/stock`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            quantity: item.quantity,
+            action: "decrease",
+          }),
+        }
+      )
+    }
 
     const order = await db.query.orders.findFirst({
       where: (o, { eq }) => eq(o.id, orderId),
@@ -84,3 +109,4 @@ export async function POST(req: NextRequest) {
     )
   }
 }
+

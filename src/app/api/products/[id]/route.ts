@@ -82,11 +82,21 @@ export async function DELETE(
   try {
     const { id } = await params
 
-    await db.delete(products).where(eq(products.id, id))
+    await db.update(products)
+      .set({
+        isDeleted: true,
+        isActive: false,
+        updatedAt: new Date(),
+      })
+      .where(eq(products.id, id))
 
     return NextResponse.json({ success: true })
   } catch (error: any) {
     console.error("Product DELETE error:", error)
-    return NextResponse.json({ error: "Failed to delete product", details: error.message }, { status: 500 })
+
+    return NextResponse.json(
+      { error: "Failed to delete product", details: error.message },
+      { status: 500 }
+    )
   }
 }
