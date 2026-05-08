@@ -1,35 +1,37 @@
 import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import { products } from "@/lib/schema"
-import { eq, sql } from "drizzle-orm"
+import { eq } from "drizzle-orm"
+
+export const dynamic = "force-dynamic"
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
-    const { id } = params
+    const { id } = context.params
     const body = await req.json()
-
-    const quantity = Number(body.quantity || 0)
-    const action = body.action
 
     const product = await db.query.products.findFirst({
       where: (p, { eq }) => eq(p.id, id),
     })
 
     if (!product) {
-      return NextResponse.json({ error: "Product not found" }, { status: 404 })
+      return NextResponse.json(
+        { error: "Product not found" },
+        { status: 404 }
+      )
     }
 
-    let newStock = Number(product.stock)
+    let newStock = Number(product.stock || 0)
 
-    if (action === "decrease") {
-      newStock = newStock - quantity
+    if (body.action === "decrease") {
+      newStock -= Number(body.quantity || 0)
     }
 
-    if (action === "increase") {
-      newStock = newStock + quantity
+    if (body.action === "increase") {
+      newStock += Number(body.quantity || 0)
     }
 
     if (newStock < 0) newStock = 0
