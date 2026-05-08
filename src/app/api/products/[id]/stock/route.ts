@@ -5,22 +5,18 @@ import { eq } from "drizzle-orm"
 
 export const dynamic = "force-dynamic"
 
-/**
- * PATCH /api/products/[id]/stock
- * body: { quantity: number, action: "increase" | "decrease" }
- */
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+type Params = {
+  params: { id: string }
+}
+
+export async function PATCH(req: NextRequest, context: Params) {
   try {
-    const { id } = params
+    const { id } = context.params
     const body = await req.json()
 
     const quantity = Number(body.quantity || 0)
     const action = body.action
 
-    // 1. get current product
     const product = await db.query.products.findFirst({
       where: (p, { eq }) => eq(p.id, id),
     })
@@ -32,18 +28,16 @@ export async function PATCH(
       )
     }
 
-    // 2. calculate new stock
     let newStock = Number(product.stock)
 
     if (action === "decrease") {
-      newStock = newStock - quantity
+      newStock -= quantity
     } else if (action === "increase") {
-      newStock = newStock + quantity
+      newStock += quantity
     }
 
     if (newStock < 0) newStock = 0
 
-    // 3. update DB
     await db
       .update(products)
       .set({
@@ -58,7 +52,10 @@ export async function PATCH(
     })
   } catch (error: any) {
     return NextResponse.json(
-      { error: "Stock update failed", details: error.message },
+      {
+        error: "Stock update failed",
+        details: error.message,
+      },
       { status: 500 }
     )
   }
