@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
-import { orders, orderItems } from "@/lib/schema"
-import { desc } from "drizzle-orm"
+import { orders, orderItems, products } from "@/lib/schema"
+import { desc, eq } from "drizzle-orm"
 import { createId } from "@paralleldrive/cuid2"
 import { cookies } from "next/headers"
 import { verifyToken } from "@/lib/auth"
@@ -81,19 +81,17 @@ export async function POST(req: NextRequest) {
       }))
     )
 
-    // 3. 🔥 UPDATE STOCK (FIXED)
+    // 3. Update stock directly
     for (const item of body.items) {
-      await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/api/products/${item.productId}/stock`,
-        {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            quantity: item.quantity,
-            action: "decrease",
-          }),
-        }
-      )
+      const product = await db.query.products.findFirst({
+        where: (p, { eq }) => eq(p.id, item.productId),
+      })
+      if (product) {
+        const newStock = Math.max(0, Number(product.stock) - item.quantity)
+        await db.update(products)
+          .set({ stock: newStock, updatedAt: new Date() })
+          .where(eq(products.id, item.productId))
+      }
     }
 
     const order = await db.query.orders.findFirst({
@@ -109,4 +107,3 @@ export async function POST(req: NextRequest) {
     )
   }
 }
-

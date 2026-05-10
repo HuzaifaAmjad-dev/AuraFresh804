@@ -123,7 +123,7 @@ export default function AboutPage() {
               <Mail className="mx-auto h-6 w-6 text-amber-600" />
               <p className="mt-3 font-medium">Email</p>
               <a href="mailto:info@aurafresh804.com" className="text-gray-600 hover:text-amber-600">
-                info@aurafresh804.com
+                aizaz@aurafresh804.com
               </a>
             </div>
 

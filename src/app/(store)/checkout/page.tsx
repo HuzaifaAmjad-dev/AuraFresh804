@@ -54,7 +54,7 @@ export default function CheckoutPage() {
     0
   )
 
-  const shipping = subtotal > 3000 ? 0 : 200
+  const shipping = subtotal > 5000 ? 0 : 200
   const total = subtotal + shipping
 
   // ✅ Upload image to your API

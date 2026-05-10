@@ -145,36 +145,36 @@ export default async function ProductDetailPage({ params }: Props) {
             </div>
           </div>
 
-          {/* Quick meta pills */}
-          {(volume || gender || occasion || season) && (
-            <div className="flex flex-wrap gap-2">
-              {volume && (
-                <span className="text-[11px] px-3 py-1 rounded-full bg-stone-100 text-stone-600 font-medium">
-                  {volume}
-                </span>
-              )}
-              {gender && gender !== "UNISEX" && (
-                <span className="text-[11px] px-3 py-1 rounded-full bg-stone-100 text-stone-600 font-medium capitalize">
-                  {gender.toLowerCase()}
-                </span>
-              )}
-              {gender === "UNISEX" && (
-                <span className="text-[11px] px-3 py-1 rounded-full bg-stone-100 text-stone-600 font-medium">
-                  Unisex
-                </span>
-              )}
-              {occasion && (
-                <span className="text-[11px] px-3 py-1 rounded-full bg-stone-100 text-stone-600 font-medium">
-                  {occasion}
-                </span>
-              )}
-              {season && (
-                <span className="text-[11px] px-3 py-1 rounded-full bg-stone-100 text-stone-600 font-medium">
-                  {season}
-                </span>
-              )}
-            </div>
-          )}
+         {/* Quick meta pills */}
+{(volume || gender || occasion || season) && (
+  <div className="flex flex-wrap gap-2">
+    {volume && (
+      <span className="text-[11px] px-3 py-1.5 rounded-full bg-violet-100 text-violet-700 font-semibold border border-violet-200 shadow-sm">
+        🧴 {volume}
+      </span>
+    )}
+    {gender && gender !== "UNISEX" && (
+      <span className="text-[11px] px-3 py-1.5 rounded-full bg-pink-100 text-pink-700 font-semibold border border-pink-200 shadow-sm capitalize">
+        ✨ {gender.toLowerCase()}
+      </span>
+    )}
+    {gender === "UNISEX" && (
+      <span className="text-[11px] px-3 py-1.5 rounded-full bg-blue-100 text-blue-700 font-semibold border border-blue-200 shadow-sm">
+        ⚡ Unisex
+      </span>
+    )}
+    {occasion && (
+  <span className="text-[11px] px-3 py-1.5 rounded-full bg-amber-100 text-amber-700 font-semibold border border-amber-200 shadow-sm">
+    🎭 {occasion}
+  </span>
+)}
+    {season && (
+      <span className="text-[11px] px-3 py-1.5 rounded-full bg-emerald-100 text-emerald-700 font-semibold border border-emerald-200 shadow-sm">
+        🌿 {season}
+      </span>
+    )}
+  </div>
+)}
 
           {/* Price */}
           <div className="flex items-baseline gap-3 py-1">
@@ -289,35 +289,72 @@ export default async function ProductDetailPage({ params }: Props) {
         </section>
       )}
 
-      {/* HOW TO WEAR */}
-      <section className="bg-[#1A1108] text-white py-16 px-6">
-        <div className="max-w-7xl mx-auto">
-          <p className="text-amber-400 text-[10px] tracking-[0.35em] uppercase font-medium mb-2">Application Tips</p>
-          <h2
-            style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
-            className="text-3xl font-bold mb-12"
-          >
-            How to Wear It Right
-          </h2>
-          <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-8">
-            {[
-              { step: "01", tip: "Apply to pulse points — wrists, neck, behind ears." },
-              { step: "02", tip: "Spray from 15 cm away for even diffusion." },
-              { step: "03", tip: "Don't rub — let the scent bloom naturally." },
-              { step: "04", tip: "Layer with unscented moisturiser for longer wear." },
-            ].map((item) => (
-              <div key={item.step} className="group border-t border-white/10 pt-6 hover:border-amber-500/50 transition-colors duration-300">
-                <span className="text-6xl font-bold text-white/[0.07] block mb-4 group-hover:text-amber-500/20 transition-colors duration-300">
-                  {item.step}
-                </span>
-                <p className="text-white/60 text-sm leading-relaxed group-hover:text-white/80 transition-colors duration-300">
-                  {item.tip}
-                </p>
-              </div>
-            ))}
-          </div>
+<section className="relative bg-[#1A1108] text-white py-20 px-6 overflow-hidden">
+
+{/* Background decorative glow */}
+<div className="absolute top-0 left-1/4 w-96 h-96 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
+<div className="absolute bottom-0 right-1/4 w-64 h-64 bg-amber-600/5 rounded-full blur-3xl pointer-events-none" />
+
+<div className="max-w-7xl mx-auto relative z-10">
+
+  {/* Header */}
+  <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between mb-14 gap-4">
+    <div>
+      <p className="text-amber-400 text-[10px] tracking-[0.35em] uppercase font-medium mb-3 flex items-center gap-2">
+        <span className="inline-block w-6 h-px bg-amber-400" />
+        Application Tips
+      </p>
+      <h2
+        style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+        className="text-4xl font-bold"
+      >
+        How to Wear It Right
+      </h2>
+    </div>
+    <p className="text-white/30 text-sm max-w-xs text-right hidden sm:block">
+      Follow these steps to make every spritz last longer and smell better.
+    </p>
+  </div>
+
+  {/* Steps */}
+  <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-6">
+    {[
+      { step: "01", emoji: "🤚", title: "Pulse Points", tip: "Apply to wrists, neck, and behind ears for maximum projection." },
+      { step: "02", emoji: "💨", title: "Right Distance", tip: "Spray from 15 cm away for even, natural diffusion across skin." },
+      { step: "03", emoji: "🌸", title: "Let It Bloom", tip: "Never rub your wrists — let the scent open and develop on its own." },
+      { step: "04", emoji: "✨", title: "Layer It", tip: "Apply over unscented moisturiser so the fragrance clings all day." },
+    ].map((item) => (
+      <div
+        key={item.step}
+        className="group relative bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.07] hover:border-amber-500/30 rounded-2xl p-6 transition-all duration-300 cursor-default"
+      >
+        {/* Step number watermark */}
+        <span className="absolute top-4 right-5 text-5xl font-bold text-white/[0.04] group-hover:text-amber-500/10 transition-colors duration-300 select-none">
+          {item.step}
+        </span>
+
+        {/* Emoji icon */}
+        <div className="w-11 h-11 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-xl mb-5 group-hover:bg-amber-500/20 transition-colors duration-300">
+          {item.emoji}
         </div>
-      </section>
+
+        {/* Title */}
+        <p className="text-white font-semibold text-sm mb-2 group-hover:text-amber-300 transition-colors duration-300">
+          {item.title}
+        </p>
+
+        {/* Tip */}
+        <p className="text-white/40 text-sm leading-relaxed group-hover:text-white/70 transition-colors duration-300">
+          {item.tip}
+        </p>
+
+        {/* Bottom accent line */}
+        <div className="absolute bottom-0 left-6 right-6 h-px bg-gradient-to-r from-transparent via-amber-500/0 to-transparent group-hover:via-amber-500/40 transition-all duration-500" />
+      </div>
+    ))}
+  </div>
+</div>
+</section>
 
       <Reviews productId={product.id} />
     </main>
