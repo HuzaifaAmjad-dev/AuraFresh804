@@ -218,7 +218,8 @@ export default async function ProductDetailPage({ params }: Props) {
           )}
 
           {/* Cart controls */}
-          <AddToCartControls product={product} priceDisplay={priceDisplay} />
+          {/* <AddToCartControls product={product} priceDisplay={priceDisplay} /> */}
+          <AddToCartControls product={product!} priceDisplay={priceDisplay} />
 
           <hr className="border-stone-200" />
 

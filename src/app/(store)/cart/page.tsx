@@ -1,5 +1,4 @@
 "use client"
-"use client"
 
 import { useState, useEffect } from "react"
 import Image from "next/image"
@@ -14,8 +13,9 @@ interface CartItem {
   name: string
   slug: string
   price: number
-  image?: string   // ✅ single string
+  image?: string
   quantity: number
+  stock: number  // ✅ added
 }
 
 export default function CartPage() {
@@ -44,8 +44,18 @@ export default function CartPage() {
 
   function updateQuantity(id: string, quantity: number) {
     if (quantity < 1) return
-    const newCart = cart.map((item) =>
-      item.id === id ? { ...item, quantity } : item
+
+    const item = cart.find((i) => i.id === id)
+    if (!item) return
+
+    // ✅ Block increment beyond available stock
+    if (quantity > item.stock) {
+      toast.error(`Only ${item.stock} item${item.stock === 1 ? "" : "s"} in stock`)
+      return
+    }
+
+    const newCart = cart.map((i) =>
+      i.id === id ? { ...i, quantity } : i
     )
     updateCart(newCart)
   }
@@ -95,17 +105,18 @@ export default function CartPage() {
                 <div className="relative h-20 w-20 rounded-lg overflow-hidden bg-gray-50 flex-shrink-0">
                   {item.image ? (
                     <Image
-                    src={getImageUrl(item.image)}
-                    alt={item.name}
-                    fill
-                    className="object-cover"
-                  />
+                      src={getImageUrl(item.image)}
+                      alt={item.name}
+                      fill
+                      className="object-cover"
+                    />
                   ) : (
                     <div className="flex items-center justify-center h-full">
                       <Package className="h-8 w-8 text-gray-200" />
                     </div>
                   )}
                 </div>
+
                 <div className="flex-1">
                   <Link
                     href={`/products/${item.slug}`}
@@ -116,7 +127,14 @@ export default function CartPage() {
                   <p className="text-purple-600 font-medium mt-1">
                     Rs. {item.price.toLocaleString()}
                   </p>
+                  {/* ✅ Low stock warning */}
+                  {item.stock <= 3 && (
+                    <p className="text-xs text-amber-500 font-medium mt-0.5">
+                      Only {item.stock} left in stock
+                    </p>
+                  )}
                 </div>
+
                 <div className="flex items-center border rounded-lg">
                   <button
                     onClick={() => updateQuantity(item.id, item.quantity - 1)}
@@ -125,13 +143,20 @@ export default function CartPage() {
                     <Minus className="h-4 w-4" />
                   </button>
                   <span className="px-3 py-1 font-medium">{item.quantity}</span>
+                  {/* ✅ Plus button visually disabled at stock limit */}
                   <button
                     onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                    className="px-2 py-1 hover:bg-gray-50 transition-colors"
+                    disabled={item.quantity >= item.stock}
+                    className={`px-2 py-1 transition-colors ${
+                      item.quantity >= item.stock
+                        ? "opacity-30 cursor-not-allowed"
+                        : "hover:bg-gray-50"
+                    }`}
                   >
                     <Plus className="h-4 w-4" />
                   </button>
                 </div>
+
                 <p className="font-bold text-gray-900 w-24 text-right">
                   Rs. {(item.price * item.quantity).toLocaleString()}
                 </p>

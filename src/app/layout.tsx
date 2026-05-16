@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     template: "%s | AuraFresh",
   },
   description:
-    "Discover premium perfumes at AuraFresh. Shop authentic fragrances for men and women in Pakistan. Free delivery on orders over Rs. 3000.",
+    "Discover premium perfumes at AuraFresh. Shop authentic fragrances for men and women in Pakistan. Free delivery on orders over Rs. 5000.",
   keywords: ["perfumes pakistan", "buy perfume online", "oud perfume", "fragrances pakistan"],
   openGraph: {
     type: "website",
