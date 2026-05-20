@@ -340,11 +340,21 @@ export default function EditProductPage() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>Volume</Label>
-                <Input
-                  value={form.volume}
-                  onChange={(e) => setForm({ ...form, volume: e.target.value })}
-                />
+              <Label>Volume</Label>
+  <Select value={form.volume} onValueChange={(v) => setForm({ ...form, volume: v })}>
+    <SelectTrigger>
+      <SelectValue placeholder="Select volume" />
+    </SelectTrigger>
+    <SelectContent>
+      <SelectItem value="30ml">30ml</SelectItem>
+      <SelectItem value="50ml">50ml</SelectItem>
+      <SelectItem value="75ml">75ml</SelectItem>
+      <SelectItem value="100ml">100ml</SelectItem>
+      <SelectItem value="125ml">125ml</SelectItem>
+      <SelectItem value="150ml">150ml</SelectItem>
+      <SelectItem value="200ml">200ml</SelectItem>
+    </SelectContent>
+  </Select>
               </div>
               <div className="space-y-2">
                 <Label>Stock</Label>

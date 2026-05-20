@@ -59,7 +59,7 @@ export default function HomeClient({
           <div className="grid md:grid-cols-3 divide-y md:divide-y-0 md:divide-x">
 
             {[
-              { icon: Truck, title: "Free Delivery", desc: "On orders over Rs. 3,000" },
+              { icon: Truck, title: "Free Delivery", desc: "On orders over Rs. 5,000" },
               { icon: Shield, title: "Authentic", desc: "100% genuine products" },
               { icon: RefreshCw, title: "Easy Returns", desc: "7-day policy" },
             ].map((f) => {

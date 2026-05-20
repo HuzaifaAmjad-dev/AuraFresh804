@@ -9,13 +9,13 @@ type Product = {
   name: string
   slug?: string
   price?: string | number
-  stock?: number | null
+  stock?: number | string | null
   images?: string[] | null
   [key: string]: unknown
 }
 
 interface Props {
-  product: Product  // ✅ not nullable — page.tsx already guards with notFound()
+  product: Product | null | undefined
   priceDisplay: string
 }
 
@@ -30,30 +30,37 @@ function getCart(): any[] {
 }
 
 export default function AddToCartControls({ product, priceDisplay }: Props) {
-  const initialStock =
-    product.stock != null && typeof product.stock === "number"
-      ? product.stock
-      : 0
+  // Parse stock safely — handle both number and string coming from DB
+  const initialStock = (() => {
+    if (!product) return 0
+    const s = product.stock
+    if (s == null) return 0
+    const n = typeof s === "number" ? s : parseInt(String(s), 10)
+    return isNaN(n) ? 0 : Math.max(0, n)
+  })()
 
-  const [stock, setStock] = useState(initialStock)
+  const [stock] = useState(initialStock)
   const [qty, setQty] = useState(1)
   const [wishlist, setWishlist] = useState(false)
   const [addedToCart, setAddedToCart] = useState(false)
 
-  const outOfStock = stock === 0
+  if (!product) return null
+
+  const p: Product = product
+  const outOfStock = stock <= 0
 
   function changeQty(delta: number) {
+    if (outOfStock) return
     setQty((prev) => Math.max(1, Math.min(stock, prev + delta)))
   }
 
   async function decrementStock(quantityBought: number) {
     try {
-      await fetch(`/api/products/${product.id}/stock`, {
+      await fetch(`/api/products/${p.id}/stock`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ decrement: quantityBought }),
       })
-      setStock((prev) => Math.max(0, prev - quantityBought))
     } catch (err) {
       console.error("Failed to decrement stock", err)
     }
@@ -61,11 +68,15 @@ export default function AddToCartControls({ product, priceDisplay }: Props) {
 
   function addToCart(e?: React.MouseEvent) {
     e?.preventDefault()
-    if (outOfStock) return
+    // Hard guard — never proceed if out of stock regardless of button state
+    if (outOfStock) {
+      toast.error("This item is currently out of stock.")
+      return
+    }
 
-    const images = (product.images as string[]) || []
+    const images = (p.images as string[]) || []
     const cart = getCart()
-    const existing = cart.find((item: any) => item.id === product.id)
+    const existing = cart.find((item: any) => item.id === p.id)
 
     if (existing) {
       const newQty = existing.quantity + qty
@@ -77,10 +88,10 @@ export default function AddToCartControls({ product, priceDisplay }: Props) {
       existing.stock = stock
     } else {
       cart.push({
-        id: product.id,
-        name: product.name,
-        slug: product.slug,
-        price: product.price,
+        id: p.id,
+        name: p.name,
+        slug: p.slug,
+        price: p.price,
         image: images[0],
         quantity: qty,
         stock,
@@ -95,14 +106,18 @@ export default function AddToCartControls({ product, priceDisplay }: Props) {
     }
 
     window.dispatchEvent(new Event("cartUpdated"))
-    toast.success(`Added ${qty} × ${product.name} to cart!`)
+    toast.success(`Added ${qty} × ${p.name} to cart!`)
     setAddedToCart(true)
     setTimeout(() => setAddedToCart(false), 2500)
   }
 
   async function buyNow(e?: React.MouseEvent) {
     e?.preventDefault()
-    if (outOfStock) return
+    // Hard guard — never proceed if out of stock regardless of button state
+    if (outOfStock) {
+      toast.error("This item is currently out of stock.")
+      return
+    }
     addToCart(e)
     await decrementStock(qty)
     window.location.href = "/cart"
@@ -156,13 +171,14 @@ export default function AddToCartControls({ product, priceDisplay }: Props) {
         <button
           onClick={addToCart}
           disabled={outOfStock}
+          aria-disabled={outOfStock}
           className={`
             flex-1 min-w-[160px] flex items-center justify-center gap-2.5
             py-4 px-6 rounded-full font-bold text-sm tracking-wide
             transition-all duration-300
             ${
               outOfStock
-                ? "bg-stone-100 text-stone-400 cursor-not-allowed border-2 border-stone-200"
+                ? "bg-stone-100 text-stone-400 cursor-not-allowed border-2 border-stone-200 pointer-events-none"
                 : addedToCart
                 ? "bg-emerald-500 text-white"
                 : "bg-gradient-to-r from-amber-400 via-amber-500 to-orange-400 text-white shadow-lg shadow-amber-200 hover:brightness-105 active:scale-[0.98]"
@@ -176,13 +192,14 @@ export default function AddToCartControls({ product, priceDisplay }: Props) {
         <button
           onClick={buyNow}
           disabled={outOfStock}
+          aria-disabled={outOfStock}
           className={`
             flex-1 min-w-[160px] flex items-center justify-center gap-2.5
             py-4 px-6 rounded-full font-bold text-sm tracking-wide
             transition-all duration-200
             ${
               outOfStock
-                ? "bg-stone-200 text-stone-400 cursor-not-allowed"
+                ? "bg-stone-200 text-stone-400 cursor-not-allowed pointer-events-none"
                 : "bg-[#1A1108] text-white hover:bg-stone-800 active:scale-[0.98]"
             }
           `}

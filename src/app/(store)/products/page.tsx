@@ -54,74 +54,80 @@ export default async function ProductsPage({ searchParams }: Props) {
   ])
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-12">
-      <h1 className="text-3xl font-bold mb-8">All Perfumes</h1>
+    <div>
+      {/* ── Page title ── */}
+      <div className="max-w-7xl mx-auto px-4 pt-8 pb-4">
+        <h1 className="text-3xl font-bold">Shop our best selling Perfumes</h1>
+      </div>
 
-      {/* Category scroll strip */}
-      <div className="relative mb-10">
-        {/* Fade edges */}
-        <div className="pointer-events-none absolute left-0 top-0 h-full w-8 bg-gradient-to-r from-white to-transparent z-10" />
-        <div className="pointer-events-none absolute right-0 top-0 h-full w-8 bg-gradient-to-l from-white to-transparent z-10" />
+      {/* ── Full-bleed black category strip ── */}
+      <div className="w-full bg-black mb-10">
+        <div className="relative max-w-7xl mx-auto">
+          {/* Fade edges */}
+          <div className="pointer-events-none absolute left-0 top-0 h-full w-10 bg-gradient-to-r from-black to-transparent z-10" />
+          <div className="pointer-events-none absolute right-0 top-0 h-full w-10 bg-gradient-to-l from-black to-transparent z-10" />
 
-        <div
-          className="flex gap-2.5 overflow-x-auto px-2 pb-1"
-          style={{
-            scrollbarWidth: "none",
-            msOverflowStyle: "none",
-            WebkitOverflowScrolling: "touch",
-          }}
-        >
-          <style>{`.cat-strip::-webkit-scrollbar { display: none; }`}</style>
-
-          {/* All pill */}
-          <Link
-            href="/products"
-            className={`
-              flex-shrink-0 px-5 py-2 rounded-full text-sm font-semibold
-              tracking-wide border-2 transition-all duration-200 whitespace-nowrap
-              ${
-                !category
-                  ? "bg-amber-500 text-white border-amber-500 ring-2 ring-amber-300 ring-offset-1"
-                  : "bg-white text-gray-500 border-gray-200 hover:border-amber-400 hover:text-amber-600 hover:bg-amber-50"
-              }
-            `}
+          <div
+            className="cat-strip flex items-center gap-1.5 overflow-x-auto px-6 py-2"
+            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
-            All
-          </Link>
+            <style>{`.cat-strip::-webkit-scrollbar{display:none}`}</style>
 
-          {categoryList.map((cat) => (
+            {/* All pill */}
             <Link
-              key={cat.id}
-              href={`/products?category=${cat.slug}`}
+              href="/products"
               className={`
-                flex-shrink-0 px-5 py-2 rounded-full text-sm font-semibold
-                tracking-wide border-2 transition-all duration-200 whitespace-nowrap
+                flex-shrink-0 px-4 py-1 rounded-full text-[11px] font-bold
+                tracking-widest uppercase border transition-all duration-200 whitespace-nowrap
                 ${
-                  category === cat.slug
-                    ? "bg-amber-500 text-white border-amber-500 ring-2 ring-amber-300 ring-offset-1"
-                    : "bg-white text-gray-500 border-gray-200 hover:border-amber-400 hover:text-amber-600 hover:bg-amber-50"
+                  !category
+                    ? "bg-white text-black border-white"
+                    : "bg-transparent text-white/90 border-white/40 hover:border-white/40 hover:text-white/90"
                 }
               `}
             >
-              {cat.name}
+              All
             </Link>
-          ))}
+
+            {/* Divider */}
+            <span className="flex-shrink-0 h-3.5 w-px bg-white/20 mx-0.5" />
+
+            {categoryList.map((cat) => (
+              <Link
+                key={cat.id}
+                href={`/products?category=${cat.slug}`}
+                className={`
+                  flex-shrink-0 px-4 py-1 rounded-full text-[11px] font-bold
+                  tracking-widest uppercase border transition-all duration-200 whitespace-nowrap
+                  ${
+                    category === cat.slug
+                      ? "bg-white text-black border-white"
+                      : "bg-transparent text-white/95 border-white/45 hover:border-white/40 hover:text-white/90"
+                  }
+                `}
+              >
+                {cat.name}
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* Products */}
-      {productList.length === 0 ? (
-        <div className="text-center py-20 text-gray-400">
-          <Package className="mx-auto mb-3 w-10 h-10" />
-          <p className="text-lg">No products found</p>
-        </div>
-      ) : (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {productList.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
-      )}
+      {/* ── Products grid ── */}
+      <div className="max-w-7xl mx-auto px-4 pb-12">
+        {productList.length === 0 ? (
+          <div className="text-center py-20 text-gray-400">
+            <Package className="mx-auto mb-3 w-10 h-10" />
+            <p className="text-lg">No products found</p>
+          </div>
+        ) : (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {productList.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   )
 }

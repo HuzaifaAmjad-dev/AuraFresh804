@@ -6,6 +6,12 @@ import slugify from "slugify"
 
 export const dynamic = "force-dynamic"
 
+function generateSlug(name: string): string {
+  const base = slugify(name, { lower: true, strict: true })
+  const suffix = Math.random().toString(36).slice(2, 8)
+  return `${base}-${suffix}`
+}
+
 export async function GET(
   _: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -36,7 +42,19 @@ export async function PUT(
   try {
     const { id } = await params
     const body = await req.json()
-    const slug = slugify(body.name, { lower: true, strict: true })
+
+    // Fetch existing product to compare name and reuse its slug
+    const existing = await db.query.products.findFirst({
+      where: (p, { eq }) => eq(p.id, id),
+    })
+
+    if (!existing) {
+      return NextResponse.json({ error: "Product not found" }, { status: 404 })
+    }
+
+    // Only generate a new slug if the name actually changed
+    const nameChanged = existing.name.trim().toLowerCase() !== body.name.trim().toLowerCase()
+    const slug = nameChanged ? generateSlug(body.name) : existing.slug
 
     await db.update(products)
       .set({
@@ -93,7 +111,6 @@ export async function DELETE(
     return NextResponse.json({ success: true })
   } catch (error: any) {
     console.error("Product DELETE error:", error)
-
     return NextResponse.json(
       { error: "Failed to delete product", details: error.message },
       { status: 500 }

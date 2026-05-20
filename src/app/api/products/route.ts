@@ -20,10 +20,16 @@ export async function GET() {
   }
 }
 
+function generateSlug(name: string): string {
+  const base = slugify(name, { lower: true, strict: true })
+  const suffix = Math.random().toString(36).slice(2, 8)
+  return `${base}-${suffix}`
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const slug = slugify(body.name, { lower: true, strict: true })
+    const slug = generateSlug(body.name)
     const id = createId()
 
     await db.insert(products).values({
@@ -45,8 +51,8 @@ export async function POST(req: NextRequest) {
       baseNotes: body.baseNotes || [],
       occasion: body.occasion || null,
       season: body.season || null,
-      createdAt: new Date(),  // 👈 add
-      updatedAt: new Date(),  // 👈 add
+      createdAt: new Date(),
+      updatedAt: new Date(),
     })
 
     const product = await db.query.products.findFirst({

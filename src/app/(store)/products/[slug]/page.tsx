@@ -145,32 +145,32 @@ export default async function ProductDetailPage({ params }: Props) {
             </div>
           </div>
 
-         {/* Quick meta pills */}
+ {/* Quick meta pills */}
 {(volume || gender || occasion || season) && (
   <div className="flex flex-wrap gap-2">
     {volume && (
-      <span className="text-[11px] px-3 py-1.5 rounded-full bg-violet-100 text-violet-700 font-semibold border border-violet-200 shadow-sm">
-        🧴 {volume}
+      <span className="text-[11px] px-3.5 py-1.5 rounded-full bg-violet-600 text-white font-extrabold border border-violet-500 tracking-wide shadow-sm uppercase">
+        {volume}
       </span>
     )}
     {gender && gender !== "UNISEX" && (
-      <span className="text-[11px] px-3 py-1.5 rounded-full bg-pink-100 text-pink-700 font-semibold border border-pink-200 shadow-sm capitalize">
-        ✨ {gender.toLowerCase()}
+      <span className="text-[11px] px-3.5 py-1.5 rounded-full bg-pink-600 text-white font-extrabold border border-pink-500 tracking-wide shadow-sm uppercase">
+        {gender}
       </span>
     )}
     {gender === "UNISEX" && (
-      <span className="text-[11px] px-3 py-1.5 rounded-full bg-blue-100 text-blue-700 font-semibold border border-blue-200 shadow-sm">
-        ⚡ Unisex
+      <span className="text-[11px] px-3.5 py-1.5 rounded-full bg-blue-600 text-white font-extrabold border border-blue-500 tracking-wide shadow-sm uppercase">
+        Unisex
       </span>
     )}
     {occasion && (
-  <span className="text-[11px] px-3 py-1.5 rounded-full bg-amber-100 text-amber-700 font-semibold border border-amber-200 shadow-sm">
-    🎭 {occasion}
-  </span>
-)}
+      <span className="text-[11px] px-3.5 py-1.5 rounded-full bg-amber-600 text-white font-extrabold border border-amber-500 tracking-wide shadow-sm uppercase">
+        {occasion}
+      </span>
+    )}
     {season && (
-      <span className="text-[11px] px-3 py-1.5 rounded-full bg-emerald-100 text-emerald-700 font-semibold border border-emerald-200 shadow-sm">
-        🌿 {season}
+      <span className="text-[11px] px-3.5 py-1.5 rounded-full bg-emerald-600 text-white font-extrabold border border-emerald-500 tracking-wide shadow-sm uppercase">
+        {season}
       </span>
     )}
   </div>
@@ -196,15 +196,23 @@ export default async function ProductDetailPage({ params }: Props) {
 
           <hr className="border-stone-200" />
 
-          {/* Scent notes */}
-          {allNotes.length > 0 && (
-            <div>
-              <p className="text-[10px] tracking-[0.3em] uppercase text-stone-400 font-medium mb-3">Scent Notes</p>
-              <div className="flex flex-wrap gap-2">
-                {allNotes.map((note) => <NoteTag key={note} label={note} />)}
-              </div>
-            </div>
-          )}
+        {/* Scent notes */}
+{allNotes.length > 0 && (
+  <div>
+    <p className="text-[10px] tracking-[0.3em] uppercase text-stone-400 font-medium mb-3">Scent Notes</p>
+    <div className="flex flex-wrap gap-2">
+      {allNotes.map((note) => (
+        <span
+          key={note}
+          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-stone-900 text-white text-xs font-extrabold tracking-widest uppercase border border-stone-700"
+        >
+          <Droplets className="h-3 w-3 text-amber-400 flex-shrink-0" />
+          {note}
+        </span>
+      ))}
+    </div>
+  </div>
+)}
 
           {/* Description */}
           {product.description && (
