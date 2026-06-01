@@ -145,31 +145,36 @@ export default async function ProductDetailPage({ params }: Props) {
             </div>
           </div>
 
- {/* Quick meta pills */}
+{/* Quick meta pills */}
 {(volume || gender || occasion || season) && (
-  <div className="flex flex-wrap gap-2">
+  <div className="flex flex-wrap gap-3">
     {volume && (
-      <span className="text-[11px] px-3.5 py-1.5 rounded-full bg-violet-600 text-white font-extrabold border border-violet-500 tracking-wide shadow-sm uppercase">
+      <span className="flex items-center gap-1.5 text-sm px-4 py-2 rounded-xl bg-violet-100 text-violet-800 font-bold border border-violet-200 tracking-wide shadow-sm uppercase">
+        <Droplets className="h-4 w-4" />
         {volume}
       </span>
     )}
     {gender && gender !== "UNISEX" && (
-      <span className="text-[11px] px-3.5 py-1.5 rounded-full bg-pink-600 text-white font-extrabold border border-pink-500 tracking-wide shadow-sm uppercase">
+      <span className="flex items-center gap-1.5 text-sm px-4 py-2 rounded-xl bg-pink-100 text-pink-800 font-bold border border-pink-200 tracking-wide shadow-sm uppercase">
+        <Sparkles className="h-4 w-4" />
         {gender}
       </span>
     )}
     {gender === "UNISEX" && (
-      <span className="text-[11px] px-3.5 py-1.5 rounded-full bg-blue-600 text-white font-extrabold border border-blue-500 tracking-wide shadow-sm uppercase">
+      <span className="flex items-center gap-1.5 text-sm px-4 py-2 rounded-xl bg-blue-100 text-blue-800 font-bold border border-blue-200 tracking-wide shadow-sm uppercase">
+        <Sparkles className="h-4 w-4" />
         Unisex
       </span>
     )}
     {occasion && (
-      <span className="text-[11px] px-3.5 py-1.5 rounded-full bg-amber-600 text-white font-extrabold border border-amber-500 tracking-wide shadow-sm uppercase">
+      <span className="flex items-center gap-1.5 text-sm px-4 py-2 rounded-xl bg-amber-100 text-amber-800 font-bold border border-amber-200 tracking-wide shadow-sm uppercase">
+        <Star className="h-4 w-4" />
         {occasion}
       </span>
     )}
     {season && (
-      <span className="text-[11px] px-3.5 py-1.5 rounded-full bg-emerald-600 text-white font-extrabold border border-emerald-500 tracking-wide shadow-sm uppercase">
+      <span className="flex items-center gap-1.5 text-sm px-4 py-2 rounded-xl bg-emerald-100 text-emerald-800 font-bold border border-emerald-200 tracking-wide shadow-sm uppercase">
+        <Wind className="h-4 w-4" />
         {season}
       </span>
     )}

@@ -57,7 +57,7 @@ export default async function ProductsPage({ searchParams }: Props) {
     <div>
       {/* ── Page title ── */}
       <div className="max-w-7xl mx-auto px-4 pt-8 pb-4">
-        <h1 className="text-3xl font-bold">Shop our best selling Perfumes</h1>
+        <h1 className="text-3xl font-bold">Best selling Products</h1>
       </div>
 
       {/* ── Full-bleed black category strip ── */}
