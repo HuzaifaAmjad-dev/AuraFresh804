@@ -40,7 +40,8 @@ export default function EditProductPage() {
     comparePrice: "",
     stock: "",
     categoryId: "",
-    volume: "",
+    volumeAmount: "",   // ← replace volume: ""
+    volumeUnit: "ml",   // ← add this
     gender: "UNISEX",
     occasion: "",
     season: "",
@@ -65,7 +66,8 @@ export default function EditProductPage() {
         comparePrice: product.comparePrice?.toString() || "",
         stock: product.stock.toString(),
         categoryId: product.categoryId,
-        volume: product.volume || "",
+        volumeAmount: product.volume ? product.volume.replace(/[^0-9.]/g, "") : "",  // ← extract number
+        volumeUnit: product.volume ? product.volume.replace(/[0-9.]/g, "") || "ml" : "ml",  // ← extract unit
         gender: product.gender,
         occasion: product.occasion || "",
         season: product.season || "",
@@ -128,6 +130,7 @@ export default function EditProductPage() {
         body: JSON.stringify({
           ...form,
           images,
+          volume: form.volumeAmount ? `${form.volumeAmount}${form.volumeUnit}` : "",  // ← combine
           topNotes: form.topNotes.split(",").map((s) => s.trim()).filter(Boolean),
           middleNotes: form.middleNotes.split(",").map((s) => s.trim()).filter(Boolean),
           baseNotes: form.baseNotes.split(",").map((s) => s.trim()).filter(Boolean),
@@ -340,21 +343,34 @@ export default function EditProductPage() {
                 </Select>
               </div>
               <div className="space-y-2">
-              <Label>Volume</Label>
-  <Select value={form.volume} onValueChange={(v) => setForm({ ...form, volume: v })}>
-    <SelectTrigger>
-      <SelectValue placeholder="Select volume" />
-    </SelectTrigger>
-    <SelectContent>
-      <SelectItem value="30ml">30ml</SelectItem>
-      <SelectItem value="50ml">50ml</SelectItem>
-      <SelectItem value="75ml">75ml</SelectItem>
-      <SelectItem value="100ml">100ml</SelectItem>
-      <SelectItem value="125ml">125ml</SelectItem>
-      <SelectItem value="150ml">150ml</SelectItem>
-      <SelectItem value="200ml">200ml</SelectItem>
-    </SelectContent>
-  </Select>
+              <div className="space-y-2">
+  <Label>Volume</Label>
+  <div className="flex">
+    <Input
+      type="number"
+      min={0}
+      placeholder="0"
+      value={form.volumeAmount}
+      onChange={(e) => setForm({ ...form, volumeAmount: e.target.value })}
+      className="rounded-r-none w-24 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+    />
+    <Select
+      value={form.volumeUnit}
+      onValueChange={(v) => setForm({ ...form, volumeUnit: v })}
+    >
+      <SelectTrigger className="rounded-l-none border-l-0 w-24">
+        <SelectValue placeholder="Unit" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="mg">mg</SelectItem>
+        <SelectItem value="g">g</SelectItem>
+        <SelectItem value="ml">ml</SelectItem>
+        <SelectItem value="l">l</SelectItem>
+        <SelectItem value="oz">oz</SelectItem>
+      </SelectContent>
+    </Select>
+  </div>
+</div>
               </div>
               <div className="space-y-2">
                 <Label>Stock</Label>
