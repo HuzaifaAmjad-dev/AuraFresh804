@@ -327,7 +327,7 @@ export default function NewProductPage() {
     </SelectTrigger>
     <SelectContent>
       <SelectItem value="mg">mg</SelectItem>
-      <SelectItem value="g">g</SelectItem>
+      <SelectItem value="gm">gm</SelectItem>
       <SelectItem value="ml">ml</SelectItem>
       <SelectItem value="l">l</SelectItem>
       <SelectItem value="oz">oz</SelectItem>
